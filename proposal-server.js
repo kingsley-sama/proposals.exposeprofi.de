@@ -3,7 +3,9 @@ const cors = require('cors');
 const path = require('path');
 const multer = require('multer');
 const fs = require('fs');
+const axios = require('axios');
 const { PureDocxProposalGenerator } = require('./pure-docx-generator');
+const https = require('https');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -78,6 +80,7 @@ app.post('/api/generate-proposal', upload.any(), async (req, res) => {
       street: clientInfo.street,
       postalCode: clientInfo.postalCode,
       city: clientInfo.city,
+      country: clientInfo.country || 'Deutschland',
       date: projectInfo.date,
       MM: projectInfo.MM,
       DD: projectInfo.DD,
@@ -120,6 +123,65 @@ app.post('/api/generate-proposal', upload.any(), async (req, res) => {
         }
       });
     }
+
+    // Send data to n8n webhook
+    const webhookPayload = {
+      offerNumber: offerNumber,
+      clientInfo: {
+        companyName: clientInfo.companyName,
+        street: clientInfo.street,
+        postalCode: clientInfo.postalCode,
+        city: clientInfo.city,
+        country: clientInfo.country || 'Deutschland'
+      },
+      projectInfo: {
+        date: projectInfo.date,
+        MM: projectInfo.MM,
+        DD: projectInfo.DD,
+        offerValidUntil: projectInfo.offerValidUntil,
+        deliveryDays: projectInfo.deliveryDays
+      },
+      pricing: {
+        totalNetPrice: pricing.totalNetPrice,
+        totalVat: pricing.totalVat,
+        totalGrossPrice: pricing.totalGrossPrice
+      },
+      signature: {
+        signatureName: signature?.signatureName || 'Christopher Helm'
+      },
+      filename: filename,
+      imagesIncluded: images.length
+    };
+
+    const webhookUrl = 'https://n8n.exposeprofi.de/webhook-test/556fd7ca-ef28-4d00-b98e-9271b07a7bad';
+    const webhookData = JSON.stringify(webhookPayload);
+
+    const urlObj = new URL(webhookUrl);
+    const options = {
+      hostname: urlObj.hostname,
+      port: 443,
+      path: urlObj.pathname,
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Content-Length': Buffer.byteLength(webhookData)
+      }
+    };
+
+    const webhookRequest = https.request(options, (webhookRes) => {
+      let body = '';
+      webhookRes.on('data', (chunk) => { body += chunk; });
+      webhookRes.on('end', () => {
+        console.log('✅ n8n webhook response:', webhookRes.statusCode, body);
+      });
+    });
+
+    webhookRequest.on('error', (err) => {
+      console.error('❌ Error sending to n8n webhook:', err.message);
+    });
+
+    webhookRequest.write(webhookData);
+    webhookRequest.end();
     
     // Return success response
     res.json({

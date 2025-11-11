@@ -14,6 +14,7 @@ class PureDocxProposalGenerator {
       street: data.street || 'Straße',
       postalCode: data.postalCode || 'PLZ',
       city: data.city || 'Ort',
+      country: data.country || 'Deutschland',
       date: data.date || 'XX.XX.2025',
       MM: data.MM || 'MM',
       DD: data.DD || 'DD',
@@ -197,7 +198,7 @@ class PureDocxProposalGenerator {
           new TextRun({ text: this.data.companyName, bold: true, size: 22, break: 1 }),
           new TextRun({ text: this.data.street, size: 22, break: 1 }),
           new TextRun({ text: `${this.data.postalCode} ${this.data.city}`, size: 22, break: 1 }),
-          new TextRun({ text: 'Deutschland', size: 22, break: 1 }),
+          new TextRun({ text: this.data.country, size: 22, break: 1 }),
         ],
       }),
 

@@ -1,0 +1,1255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ExposeProfi Proposal Generator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f5f7fa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12);
+            max-width: 900px;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1a2a4a 0%, #253550 100%);
+            padding: 48px 40px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+        }
+
+        .header-content {
+            flex: 1;
+        }
+
+        .header h1 {
+            color: white;
+            font-size: 28px;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+            margin: 0;
+        }
+
+        .header p {
+            color: rgba(255, 255, 255, 0.8);
+            margin: 8px 0 0 0;
+            font-size: 15px;
+        }
+
+        .header-logo {
+            flex-shrink: 0;
+        }
+
+        .header-logo img {
+            max-width: 280px;
+            height: auto;
+            filter: brightness(0) invert(1);
+        }
+
+        .form-container {
+            padding: 48px 40px;
+        }
+
+        .section {
+            margin-bottom: 40px;
+            padding-bottom: 32px;
+            border-bottom: 1px solid #e0e6ed;
+        }
+
+        .section:last-child {
+            border-bottom: none;
+        }
+
+        .section-title {
+            font-size: 20px;
+            color: #1a2a4a;
+            margin-bottom: 24px;
+            font-weight: 600;
+            letter-spacing: -0.3px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 28px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: #1a2a4a;
+            margin-bottom: 10px;
+            letter-spacing: 0.3px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #e0e6ed;
+            border-radius: 8px;
+            font-size: 15px;
+            color: #1a2a4a;
+            background: white;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #1a2a4a;
+            box-shadow: 0 0 0 3px rgba(26, 42, 74, 0.1);
+            background: white;
+        }
+
+        .form-group input::placeholder,
+        .form-group textarea::placeholder {
+            color: #9ca3af;
+        }
+
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+            font-family: inherit;
+        }
+
+        .service-item {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            border: 1px solid #e0e6ed;
+            transition: all 0.3s ease;
+        }
+
+        .service-item:hover {
+            border-color: #1a2a4a;
+            box-shadow: 0 2px 8px rgba(26, 42, 74, 0.08);
+        }
+
+        .service-item.active {
+            border-color: #1a2a4a;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(26, 42, 74, 0.1);
+        }
+
+        .service-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .service-header input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            margin-right: 12px;
+            cursor: pointer;
+            accent-color: #1a2a4a;
+        }
+
+        .service-header label {
+            font-weight: 600;
+            font-size: 15px;
+            color: #1a2a4a;
+            cursor: pointer;
+            flex: 1;
+            letter-spacing: -0.2px;
+        }
+
+        .service-details {
+            display: none;
+            margin-left: 32px;
+            margin-top: 15px;
+        }
+
+        .service-item.active .service-details {
+            display: grid;
+            gap: 15px;
+        }
+
+        .inline-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .price-display {
+            background: #f0f3f8;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-weight: 600;
+            color: #1a2a4a;
+            text-align: center;
+            border: 1px solid #e0e6ed;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin-top: 32px;
+        }
+
+        button {
+            padding: 14px 32px;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #1a2a4a 0%, #253550 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(26, 42, 74, 0.3);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: #f0f3f8;
+            color: #1a2a4a;
+            border: 1px solid #e0e6ed;
+        }
+
+        .btn-secondary:hover {
+            background: #e8ecf2;
+        }
+
+        .summary-box {
+            background: linear-gradient(135deg, #1a2a4a 0%, #253550 100%);
+            color: white;
+            padding: 32px;
+            border-radius: 12px;
+            margin-top: 24px;
+            box-shadow: 0 8px 24px rgba(26, 42, 74, 0.2);
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 16px;
+            font-size: 16px;
+        }
+
+        .summary-row.total {
+            font-size: 24px;
+            font-weight: 700;
+            padding-top: 16px;
+            border-top: 2px solid rgba(255, 255, 255, 0.3);
+            margin-top: 8px;
+        }
+
+        .helper-text {
+            font-size: 13px;
+            color: #9ca3af;
+            margin-top: 6px;
+        }
+
+        .json-output {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 20px;
+            border-radius: 10px;
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .json-output.show {
+            display: block;
+        }
+
+        .copy-btn {
+            background: #4caf50;
+            color: white;
+            padding: 8px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+
+        .copy-btn:hover {
+            background: #45a049;
+        }
+
+        .image-item {
+            background: #f9fafb;
+            border: 2px dashed #e0e6ed;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 16px;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .image-item:hover {
+            border-color: #1a2a4a;
+            background: white;
+        }
+
+        .image-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .image-item-title {
+            font-weight: 600;
+            color: #1a2a4a;
+            font-size: 15px;
+        }
+
+        .remove-image-btn {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.3s ease;
+        }
+
+        .remove-image-btn:hover {
+            background: #dc2626;
+        }
+
+        .image-upload-area {
+            border: 2px dashed #cbd5e1;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: white;
+            margin-bottom: 16px;
+        }
+
+        .image-upload-area:hover {
+            border-color: #1a2a4a;
+            background: #f9fafb;
+        }
+
+        .image-upload-area.has-image {
+            border-color: #10b981;
+            background: #f0fdf4;
+        }
+
+        .image-preview {
+            max-width: 200px;
+            max-height: 150px;
+            margin: 10px auto;
+            display: none;
+            border-radius: 6px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .image-preview.show {
+            display: block;
+        }
+
+        .image-upload-text {
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        .image-upload-icon {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column-reverse;
+                align-items: flex-start;
+                gap: 20px;
+                padding: 30px 20px;
+            }
+
+            .header-logo img {
+                max-width: 150px;
+            }
+
+            .form-content {
+                padding: 25px;
+            }
+
+            .inline-group {
+                grid-template-columns: 1fr;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-content">
+                <h1>Proposal Generator</h1>
+                <p>Client Proposal Generation Form</p>
+            </div>
+            <div class="header-logo">
+                <img src="63d678403dc29bfcbdb0069c_logo exposeprofi weiss 2.png" alt="ExposeProfi Logo">
+            </div>
+        </div>
+
+        <form id="proposalForm" class="form-container">
+            <!-- Client Information -->
+            <div class="section">
+                <h2 class="section-title">👤 Client Information</h2>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="clientNumber">Client Number</label>
+                        <input type="text" id="clientNumber" placeholder="e.g. CLI-2025-001">
+                        <span class="helper-text">Optional: Internal client reference number</span>
+                    </div>
+                    <div class="form-group">
+                        <label for="companyName">Company Name *</label>
+                        <input type="text" id="companyName" required placeholder="e.g. Sample Company GmbH">
+                    </div>
+                    <div class="form-group">
+                        <label for="street">Street & Number *</label>
+                        <input type="text" id="street" required placeholder="e.g. Sample Street 123">
+                    </div>
+                    <div class="form-group">
+                        <label for="postalCode">Postal Code *</label>
+                        <input type="text" id="postalCode" required placeholder="e.g. 12345">
+                    </div>
+                    <div class="form-group">
+                        <label for="city">City *</label>
+                        <input type="text" id="city" required placeholder="e.g. Berlin">
+                    </div>
+                    <div class="form-group">
+                        <label for="country">Country *</label>
+                        <select id="country" required>
+                            <option value="">Select Country</option>
+                            <option value="Deutschland">Deutschland</option>
+                            <option value="Österreich">Österreich</option>
+                            <option value="Schweiz">Schweiz</option>
+                            <option value="Frankreich">Frankreich</option>
+                            <option value="Italien">Italien</option>
+                            <option value="Spanien">Spanien</option>
+                            <option value="Niederlande">Niederlande</option>
+                            <option value="Belgien">Belgien</option>
+                            <option value="Polen">Polen</option>
+                            <option value="Tschechien">Tschechien</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Project Information -->
+            <div class="section">
+                <h2 class="section-title">🏢 Project Information</h2>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="projectNumber">Project Number</label>
+                        <input type="text" id="projectNumber" placeholder="e.g. PRJ-2025-042">
+                        <span class="helper-text">Optional: Internal project reference number</span>
+                    </div>
+                    <div class="form-group">
+                        <label for="projectName">Project Name</label>
+                        <input type="text" id="projectName" placeholder="e.g. Sunshine Residential Complex">
+                    </div>
+                    <div class="form-group">
+                        <label for="unitCount">Number of Units</label>
+                        <input type="number" id="unitCount" placeholder="e.g. 24">
+                    </div>
+                    <div class="form-group">
+                        <label for="deliveryDays">Delivery Time (Working Days) *</label>
+                        <input type="number" id="deliveryDays" required value="14">
+                    </div>
+                    <div class="form-group">
+                        <label for="offerValidUntil">Offer Valid Until *</label>
+                        <input type="date" id="offerValidUntil" required>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Services Section -->
+            <div class="section">
+                <h2 class="section-title">🎨 Select Services</h2>
+
+                <!-- 3D Exterior Ground Perspective -->
+                <div class="service-item" id="service-exterior-ground">
+                    <div class="service-header">
+                        <input type="checkbox" id="check-exterior-ground">
+                        <label for="check-exterior-ground">3D-Außenvisualisierung Bodenperspektive</label>
+                    </div>
+                    <div class="service-details">
+                        <div class="form-group">
+                            <label>Number of Views *</label>
+                            <input type="number" class="quantity-input" data-service="exterior-ground" min="0" value="0">
+                            <span class="helper-text">Tiered pricing: 1=20€, 2=18€, 3=16€, 4=14€, 5+=12€ per view</span>
+                        </div>
+                        <div class="form-group">
+                            <label>Perspective Description</label>
+                            <textarea placeholder="e.g. South-East view, North-West view..."></textarea>
+                        </div>
+                        <div class="price-display">
+                            <span>Price: <strong><span class="service-price" data-service="exterior-ground">0,00 €</span></strong></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3D Exterior Bird's Eye View -->
+                <div class="service-item" id="service-exterior-bird">
+                    <div class="service-header">
+                        <input type="checkbox" id="check-exterior-bird">
+                        <label for="check-exterior-bird">3D-Außenvisualisierung Vogelperspektive</label>
+                    </div>
+                    <div class="service-details">
+                        <div class="form-group">
+                            <label>Number of Views *</label>
+                            <input type="number" class="quantity-input" data-service="exterior-bird" min="0" value="0">
+                            <span class="helper-text">Price: 12,00 € per view (only with ground perspectives)</span>
+                        </div>
+                        <div class="price-display">
+                            <span>Price: <strong><span class="service-price" data-service="exterior-bird">0,00 €</span></strong></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3D Floor Plan -->
+                <div class="service-item" id="service-3d-floorplan">
+                    <div class="service-header">
+                        <input type="checkbox" id="check-3d-floorplan">
+                        <label for="check-3d-floorplan">3D-Grundriss</label>
+                    </div>
+                    <div class="service-details">
+                        <div class="form-group">
+                            <label>Number of Floor Plans *</label>
+                            <input type="number" class="quantity-input" data-service="3d-floorplan" min="0" value="0">
+                            <span class="helper-text">Price: 69,00 € per floor plan</span>
+                        </div>
+                        <div class="price-display">
+                            <span>Price: <strong><span class="service-price" data-service="3d-floorplan">0,00 €</span></strong></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3D Complete Floor View -->
+                <div class="service-item" id="service-3d-complete-floor">
+                    <div class="service-header">
+                        <input type="checkbox" id="check-3d-complete-floor">
+                        <label for="check-3d-complete-floor">3D-Geschossansicht</label>
+                    </div>
+                    <div class="service-details">
+                        <div class="form-group">
+                            <label>Number of Floor Views *</label>
+                            <input type="number" class="quantity-input" data-service="3d-complete-floor" min="0" value="0">
+                            <span class="helper-text">Price: 199,00 € per floor</span>
+                        </div>
+                        <div class="form-group">
+                            <label>Units Description</label>
+                            <textarea placeholder="e.g. EG, 1. OG, 2. OG..."></textarea>
+                        </div>
+                        <div class="price-display">
+                            <span>Price: <strong><span class="service-price" data-service="3d-complete-floor">0,00 €</span></strong></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2D Floor Plan -->
+                <div class="service-item" id="service-2d-floorplan">
+                    <div class="service-header">
+                        <input type="checkbox" id="check-2d-floorplan">
+                        <label for="check-2d-floorplan">2D-Grundriss</label>
+                    </div>
+                    <div class="service-details">
+                        <div class="form-group">
+                            <label>Number of Floor Plans *</label>
+                            <input type="number" class="quantity-input" data-service="2d-floorplan" min="0" value="0">
+                            <span class="helper-text">Price: 49,00 € per floor plan</span>
+                        </div>
+                        <div class="price-display">
+                            <span>Price: <strong><span class="service-price" data-service="2d-floorplan">0,00 €</span></strong></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Digital Home Staging -->
+                <div class="service-item" id="service-home-staging">
+                    <div class="service-header">
+                        <input type="checkbox" id="check-home-staging">
+                        <label for="check-home-staging">Digital Home Staging</label>
+                    </div>
+                    <div class="service-details">
+                        <div class="form-group">
+                            <label>Number of Photos *</label>
+                            <input type="number" class="quantity-input" data-service="home-staging" min="0" value="0">
+                            <span class="helper-text">Price: 99,00 € per photo</span>
+                        </div>
+                        <div class="form-group">
+                            <label>Rooms Description</label>
+                            <textarea placeholder="e.g. Wohnzimmer, Küche, Schlafzimmer..."></textarea>
+                        </div>
+                        <div class="price-display">
+                            <span>Price: <strong><span class="service-price" data-service="home-staging">0,00 €</span></strong></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Digital Renovation -->
+                <div class="service-item" id="service-renovation">
+                    <div class="service-header">
+                        <input type="checkbox" id="check-renovation">
+                        <label for="check-renovation">Digitale Renovierung</label>
+                    </div>
+                    <div class="service-details">
+                        <div class="form-group">
+                            <label>Number of Photos *</label>
+                            <input type="number" class="quantity-input" data-service="renovation" min="0" value="0">
+                            <span class="helper-text">Price: 139,00 € per photo</span>
+                        </div>
+                        <div class="form-group">
+                            <label>Rooms Description</label>
+                            <textarea placeholder="e.g. Bad, Küche..."></textarea>
+                        </div>
+                        <div class="price-display">
+                            <span>Price: <strong><span class="service-price" data-service="renovation">0,00 €</span></strong></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 360° Interior Tour -->
+                <div class="service-item" id="service-360-interior">
+                    <div class="service-header">
+                        <input type="checkbox" id="check-360-interior">
+                        <label for="check-360-interior">360° Tour Innen</label>
+                    </div>
+                    <div class="service-details">
+                        <div class="form-group">
+                            <label>Number of Tours *</label>
+                            <input type="number" class="quantity-input" data-service="360-interior" min="0" value="0">
+                            <span class="helper-text">Price: 599,00 € per tour</span>
+                        </div>
+                        <div class="form-group">
+                            <label>Unit Description</label>
+                            <textarea placeholder="e.g. Apt. 1.02, Penthouse..."></textarea>
+                        </div>
+                        <div class="price-display">
+                            <span>Price: <strong><span class="service-price" data-service="360-interior">0,00 €</span></strong></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 360° Exterior Video -->
+                <div class="service-item" id="service-360-exterior">
+                    <div class="service-header">
+                        <input type="checkbox" id="check-360-exterior">
+                        <label for="check-360-exterior">360° Video Außen</label>
+                    </div>
+                    <div class="service-details">
+                        <div class="form-group">
+                            <label>Number of Videos *</label>
+                            <input type="number" class="quantity-input" data-service="360-exterior" min="0" value="0">
+                            <span class="helper-text">Only in combination with min. 2x 3D-Außenvisualisierung</span>
+                        </div>
+                        <div class="price-display">
+                            <span>Price: <strong><span class="service-price" data-service="360-exterior">0,00 €</span></strong></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slideshow Video -->
+                <div class="service-item" id="service-slideshow">
+                    <div class="service-header">
+                        <input type="checkbox" id="check-slideshow">
+                        <label for="check-slideshow">Slideshow Video</label>
+                    </div>
+                    <div class="service-details">
+                        <div class="form-group">
+                            <label>Number of Videos *</label>
+                            <input type="number" class="quantity-input" data-service="slideshow" min="0" value="0">
+                            <span class="helper-text">Price: 499,00 € per video</span>
+                        </div>
+                        <div class="price-display">
+                            <span>Price: <strong><span class="service-price" data-service="slideshow">0,00 €</span></strong></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3D Site Plan -->
+                <div class="service-item" id="service-site-plan">
+                    <div class="service-header">
+                        <input type="checkbox" id="check-site-plan">
+                        <label for="check-site-plan">3D-Lageplan</label>
+                    </div>
+                    <div class="service-details">
+                        <div class="form-group">
+                            <label>Number of Site Plans *</label>
+                            <input type="number" class="quantity-input" data-service="site-plan" min="0" value="0">
+                            <span class="helper-text">Price: 99,00 € per site plan</span>
+                        </div>
+                        <div class="price-display">
+                            <span>Price: <strong><span class="service-price" data-service="site-plan">0,00 €</span></strong></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Social Media Package -->
+                <div class="service-item" id="service-social-media">
+                    <div class="service-header">
+                        <input type="checkbox" id="check-social-media">
+                        <label for="check-social-media">Social Media Paket</label>
+                    </div>
+                    <div class="service-details">
+                        <div class="form-group">
+                            <label>Number of Packages *</label>
+                            <input type="number" class="quantity-input" data-service="social-media" min="0" value="0">
+                            <span class="helper-text">Price: 299,00 € per package</span>
+                        </div>
+                        <div class="price-display">
+                            <span>Price: <strong><span class="service-price" data-service="social-media">0,00 €</span></strong></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3D Interior Visualization -->
+                <div class="service-item" id="service-interior">
+                    <div class="service-header">
+                        <input type="checkbox" id="check-interior">
+                        <label for="check-interior">3D-Innenvisualisierung</label>
+                    </div>
+                    <div class="service-details">
+                        <div class="form-group">
+                            <label>Number of Views *</label>
+                            <input type="number" class="quantity-input" data-service="interior" min="0" value="0">
+                            <span class="helper-text">Tiered pricing: 1=399€, 2=299€, 3=289€, 4=269€, 5=259€, 6=249€, 7=239€, 8=229€, 9=219€, 10+=199€</span>
+                        </div>
+                        <div class="form-group">
+                            <label>Rooms Description</label>
+                            <textarea placeholder="e.g. Wohnzimmer, Küche, Schlafzimmer, Bad..."></textarea>
+                        </div>
+                        <div class="price-display">
+                            <span>Price: <strong><span class="service-price" data-service="interior">0,00 €</span></strong></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3D Terrace Visualization -->
+                <div class="service-item" id="service-terrace">
+                    <div class="service-header">
+                        <input type="checkbox" id="check-terrace">
+                        <label for="check-terrace">3D-Visualisierung Terrasse</label>
+                    </div>
+                    <div class="service-details">
+                        <div class="form-group">
+                            <label>Number of Views *</label>
+                            <input type="number" class="quantity-input" data-service="terrace" min="0" value="0">
+                            <span class="helper-text">Preis nach Anfrage</span>
+                        </div>
+                        <div class="form-group">
+                            <label>Unit Description</label>
+                            <textarea placeholder="e.g. Terrasse Apt. 2.03..."></textarea>
+                        </div>
+                        <div class="price-display">
+                            <span>Price: <strong><span class="service-price" data-service="terrace">0,00 €</span></strong></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Perspective Images Section -->
+            <div class="section">
+                <h2 class="section-title">🖼️ Perspective Images (Recommended Perspectives)</h2>
+                <p class="helper-text" style="margin-bottom: 20px;">Add images with titles and descriptions that will be included on the second-to-last page of the proposal.</p>
+                
+                <div id="imagesContainer">
+                    <!-- Image items will be added here dynamically -->
+                </div>
+                
+                <button type="button" class="btn-secondary" onclick="addImageField()" style="margin-top: 16px;">
+                    ➕ Add Image
+                </button>
+            </div>
+
+            <!-- Summary -->
+            <div class="section">
+                <h2 class="section-title">💰 Summary</h2>
+                <div class="summary-box">
+                    <div class="summary-row">
+                        <span>Total Net Price:</span>
+                        <span id="totalNet">0,00 €</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>VAT (19%):</span>
+                        <span id="totalVat">0,00 €</span>
+                    </div>
+                    <div class="summary-row total">
+                        <span>Total Gross Price:</span>
+                        <span id="totalGross">0,00 €</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="button-group">
+                <button type="button" class="btn-secondary" onclick="resetForm()">🔄 Reset</button>
+                <button type="button" class="btn-primary" onclick="generateJSON()">📋 Generate JSON</button>
+                <button type="submit" class="btn-primary">📄 Generate Proposal</button>
+            </div>
+
+            <!-- JSON Output -->
+            <div id="jsonOutput" class="json-output"></div>
+            <button type="button" class="copy-btn" id="copyBtn" style="display: none;" onclick="copyJSON()">📋 Copy JSON</button>
+        </form>
+    </div>
+
+    <script>
+        // Pricing tiers
+        const pricing = {
+            'exterior-ground': (qty) => {
+                if (qty === 0) return 0;
+                if (qty === 1) return 20;
+                if (qty === 2) return 18;
+                if (qty === 3) return 16;
+                if (qty === 4) return 14;
+                return 12; // 5+
+            },
+            'exterior-bird': () => 12,
+            '3d-floorplan': () => 69,
+            '3d-complete-floor': () => 199,
+            '2d-floorplan': () => 49,
+            'home-staging': () => 99,
+            'renovation': () => 139,
+            '360-interior': () => 599,
+            '360-exterior': () => 0, // Price on request
+            'slideshow': () => 499,
+            'site-plan': () => 99,
+            'social-media': () => 299,
+            'interior': (qty) => {
+                if (qty === 0) return 0;
+                if (qty === 1) return 399;
+                if (qty === 2) return 299;
+                if (qty === 3) return 289;
+                if (qty === 4) return 269;
+                if (qty === 5) return 259;
+                if (qty === 6) return 249;
+                if (qty === 7) return 239;
+                if (qty === 8) return 229;
+                if (qty === 9) return 219;
+                return 199; // 10+
+            },
+            'terrace': () => 0 // Price on request
+        };
+
+        // Toggle service selection
+        document.querySelectorAll('.service-header input[type="checkbox"]').forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                const serviceItem = this.closest('.service-item');
+                if (this.checked) {
+                    serviceItem.classList.add('active');
+                } else {
+                    serviceItem.classList.remove('active');
+                    // Reset quantity
+                    const quantityInput = serviceItem.querySelector('.quantity-input');
+                    if (quantityInput) quantityInput.value = 0;
+                    updateCalculations();
+                }
+            });
+        });
+
+        // Update calculations on quantity change
+        document.querySelectorAll('.quantity-input').forEach(input => {
+            input.addEventListener('input', updateCalculations);
+        });
+
+        function updateCalculations() {
+            let totalNet = 0;
+
+            document.querySelectorAll('.quantity-input').forEach(input => {
+                const service = input.dataset.service;
+                const quantity = parseInt(input.value) || 0;
+                const priceFunc = pricing[service];
+                
+                if (priceFunc) {
+                    let unitPrice, serviceTotal;
+                    
+                    if (service === 'exterior-ground' || service === 'interior') {
+                        unitPrice = priceFunc(quantity);
+                        serviceTotal = unitPrice * quantity;
+                    } else {
+                        unitPrice = priceFunc();
+                        serviceTotal = unitPrice * quantity;
+                    }
+                    
+                    // Update service price display
+                    const priceDisplay = document.querySelector(`.service-price[data-service="${service}"]`);
+                    if (priceDisplay) {
+                        priceDisplay.textContent = formatPrice(serviceTotal);
+                    }
+                    
+                    totalNet += serviceTotal;
+                }
+            });
+
+            const totalVat = totalNet * 0.19;
+            const totalGross = totalNet + totalVat;
+
+            document.getElementById('totalNet').textContent = formatPrice(totalNet);
+            document.getElementById('totalVat').textContent = formatPrice(totalVat);
+            document.getElementById('totalGross').textContent = formatPrice(totalGross);
+        }
+
+        function formatPrice(price) {
+            return price.toFixed(2).replace('.', ',') + ' €';
+        }
+
+        function formatPriceForJSON(price) {
+            return price.toFixed(2).replace('.', ',');
+        }
+
+        // Image management
+        let imageCounter = 0;
+
+        function addImageField() {
+            imageCounter++;
+            const container = document.getElementById('imagesContainer');
+            
+            const imageItem = document.createElement('div');
+            imageItem.className = 'image-item';
+            imageItem.id = `image-item-${imageCounter}`;
+            imageItem.innerHTML = `
+                <div class="image-item-header">
+                    <span class="image-item-title">Image ${imageCounter}</span>
+                    <button type="button" class="remove-image-btn" onclick="removeImageField(${imageCounter})">
+                        🗑️ Remove
+                    </button>
+                </div>
+                
+                <div class="form-group">
+                    <label>Image Title *</label>
+                    <input type="text" 
+                           class="image-title-input" 
+                           data-image="${imageCounter}"
+                           placeholder="e.g. Perspektive 1 - Hauptansicht"
+                           required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Image Description *</label>
+                    <textarea class="image-description-input" 
+                              data-image="${imageCounter}"
+                              placeholder="e.g. Ansicht der Immobilie von Süden mit optimaler Beleuchtung"
+                              rows="3"
+                              required></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label>Upload Image *</label>
+                    <div class="image-upload-area" onclick="document.getElementById('imageFile-${imageCounter}').click()">
+                        <div class="image-upload-icon">📷</div>
+                        <div class="image-upload-text">Click to upload image</div>
+                        <div class="image-upload-text" style="font-size: 12px; margin-top: 4px;">PNG, JPG, JPEG (Max 5MB)</div>
+                        <img class="image-preview" id="imagePreview-${imageCounter}" />
+                    </div>
+                    <input type="file" 
+                           id="imageFile-${imageCounter}"
+                           class="image-file-input"
+                           data-image="${imageCounter}"
+                           accept="image/png,image/jpeg,image/jpg"
+                           style="display: none;"
+                           onchange="handleImageUpload(${imageCounter})"
+                           required>
+                    <span class="helper-text">This image will be included in the proposal document</span>
+                </div>
+            `;
+            
+            container.appendChild(imageItem);
+        }
+
+        function removeImageField(id) {
+            const item = document.getElementById(`image-item-${id}`);
+            if (item) {
+                item.remove();
+            }
+        }
+
+        function handleImageUpload(id) {
+            const fileInput = document.getElementById(`imageFile-${id}`);
+            const preview = document.getElementById(`imagePreview-${id}`);
+            const uploadArea = fileInput.closest('.image-upload-area');
+            
+            if (fileInput.files && fileInput.files[0]) {
+                const file = fileInput.files[0];
+                
+                // Check file size (5MB max)
+                if (file.size > 5 * 1024 * 1024) {
+                    alert('File size must be less than 5MB');
+                    fileInput.value = '';
+                    return;
+                }
+                
+                // Preview image
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                    preview.classList.add('show');
+                    uploadArea.classList.add('has-image');
+                    
+                    const uploadText = uploadArea.querySelector('.image-upload-text');
+                    uploadText.textContent = `✅ ${file.name}`;
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function collectImageData() {
+            const images = [];
+            const imageItems = document.querySelectorAll('.image-item');
+            
+            imageItems.forEach(item => {
+                const id = item.id.split('-')[2];
+                const titleInput = item.querySelector('.image-title-input');
+                const descriptionInput = item.querySelector('.image-description-input');
+                const fileInput = item.querySelector('.image-file-input');
+                
+                if (titleInput && descriptionInput && fileInput && fileInput.files[0]) {
+                    images.push({
+                        title: titleInput.value,
+                        description: descriptionInput.value,
+                        fileName: fileInput.files[0].name,
+                        fileSize: fileInput.files[0].size,
+                        fileType: fileInput.files[0].type
+                    });
+                }
+            });
+            
+            return images;
+        }
+
+        function generateJSON() {
+            const data = collectFormData();
+            const jsonString = JSON.stringify(data, null, 2);
+            
+            document.getElementById('jsonOutput').textContent = jsonString;
+            document.getElementById('jsonOutput').classList.add('show');
+            document.getElementById('copyBtn').style.display = 'block';
+            
+            // Scroll to JSON
+            document.getElementById('jsonOutput').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        function collectFormData() {
+            // Calculate totals
+            let totalNet = 0;
+            const services = [];
+
+            document.querySelectorAll('.service-item.active').forEach(item => {
+                const checkbox = item.querySelector('input[type="checkbox"]');
+                const serviceName = checkbox.nextElementSibling.textContent;
+                const quantityInput = item.querySelector('.quantity-input');
+                const quantity = parseInt(quantityInput?.value) || 0;
+                const service = quantityInput?.dataset.service;
+                
+                if (service && quantity > 0) {
+                    const priceFunc = pricing[service];
+                    let unitPrice, serviceTotal;
+                    
+                    if (service === 'exterior-ground' || service === 'interior') {
+                        unitPrice = priceFunc(quantity);
+                        serviceTotal = unitPrice * quantity;
+                    } else {
+                        unitPrice = priceFunc();
+                        serviceTotal = unitPrice * quantity;
+                    }
+                    
+                    totalNet += serviceTotal;
+                    
+                    services.push({
+                        name: serviceName,
+                        quantity: quantity,
+                        unitPrice: formatPriceForJSON(unitPrice),
+                        totalPrice: formatPriceForJSON(serviceTotal)
+                    });
+                }
+            });
+
+            const totalVat = totalNet * 0.19;
+            const totalGross = totalNet + totalVat;
+
+            const today = new Date();
+            const dateStr = today.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
+            
+            return {
+                clientInfo: {
+                    clientNumber: document.getElementById('clientNumber').value || '',
+                    companyName: document.getElementById('companyName').value || 'Company',
+                    street: document.getElementById('street').value || 'Street',
+                    postalCode: document.getElementById('postalCode').value || 'ZIP',
+                    city: document.getElementById('city').value || 'City',
+                    country: document.getElementById('country').value || 'Deutschland'
+                },
+                projectInfo: {
+                    projectNumber: document.getElementById('projectNumber').value || '',
+                    projectName: document.getElementById('projectName').value || '',
+                    unitCount: document.getElementById('unitCount').value || '',
+                    deliveryDays: document.getElementById('deliveryDays').value || 'XXX',
+                    offerValidUntil: document.getElementById('offerValidUntil').value || 'XX.XX.25',
+                    date: dateStr,
+                    MM: String(today.getMonth() + 1).padStart(2, '0'),
+                    DD: String(today.getDate()).padStart(2, '0')
+                },
+                services: services,
+                images: collectImageData(),
+                pricing: {
+                    totalNetPrice: formatPriceForJSON(totalNet),
+                    totalVat: formatPriceForJSON(totalVat),
+                    totalGrossPrice: formatPriceForJSON(totalGross)
+                },
+                signature: {
+                    signatureName: 'Christopher Helm'
+                }
+            };
+        }
+
+        function copyJSON() {
+            const jsonText = document.getElementById('jsonOutput').textContent;
+            navigator.clipboard.writeText(jsonText).then(() => {
+                const btn = document.getElementById('copyBtn');
+                const originalText = btn.textContent;
+                btn.textContent = '✅ Copied!';
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                }, 2000);
+            });
+        }
+
+        function resetForm() {
+            if (confirm('Are you sure you want to reset the form?')) {
+                document.getElementById('proposalForm').reset();
+                document.querySelectorAll('.service-item').forEach(item => {
+                    item.classList.remove('active');
+                });
+                document.getElementById('jsonOutput').classList.remove('show');
+                document.getElementById('copyBtn').style.display = 'none';
+                // Clear images
+                document.getElementById('imagesContainer').innerHTML = '';
+                imageCounter = 0;
+                updateCalculations();
+            }
+        }
+
+        // Form submission
+        document.getElementById('proposalForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            // Show loading state
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = '⏳ Generating...';
+            submitBtn.disabled = true;
+            
+            try {
+                const data = collectFormData();
+                
+                // Create FormData for file uploads
+                const formData = new FormData();
+                formData.append('data', JSON.stringify(data));
+                
+                // Add image files
+                const imageItems = document.querySelectorAll('.image-item');
+                imageItems.forEach((item, index) => {
+                    const fileInput = item.querySelector('.image-file-input');
+                    if (fileInput && fileInput.files[0]) {
+                        formData.append(`image-${index}`, fileInput.files[0]);
+                    }
+                });
+                
+                console.log('Submitting proposal with', imageItems.length, 'images');
+                
+                // Send to local server
+                const apiUrl = 'http://localhost:3000/api/generate-proposal';
+                
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok && result.success) {
+                    alert(`✅ Proposal created successfully!\n\nOffer Number: ${result.offerNumber}\nClient: ${result.clientName}\nTotal: ${result.totalAmount} €\nImages: ${result.imagesIncluded}`);
+                    console.log('Response:', result);
+                    
+                    // Download the file
+                    if (result.fileUrl) {
+                        window.open(result.fileUrl, '_blank');
+                    }
+                    
+                    // Show JSON
+                    generateJSON();
+                } else {
+                    throw new Error(result.error || 'Failed to create proposal');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert(`❌ Error creating proposal:\n${error.message}\n\nMake sure the server is running (node proposal-server.js)`);
+            } finally {
+                // Reset button
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+            }
+        });
+
+        // Set default date (2 weeks from now)
+        const twoWeeksLater = new Date();
+        twoWeeksLater.setDate(twoWeeksLater.getDate() + 14);
+        document.getElementById('offerValidUntil').valueAsDate = twoWeeksLater;
+
+        // Initialize calculations
+        updateCalculations();
+    </script>
+</body>
+</html>
