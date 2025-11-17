@@ -29,7 +29,10 @@ const storage = multer.diskStorage({
 
 const upload = multer({
   storage: storage,
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
+  limits: { 
+    fileSize: 10 * 1024 * 1024, // 10MB file size limit
+    fieldSize: 25 * 1024 * 1024  // 25MB field size limit (for base64 images in JSON)
+  },
   fileFilter: (req, file, cb) => {
     if (file.mimetype.startsWith('image/')) {
       cb(null, true);
@@ -41,7 +44,8 @@ const upload = multer({
 
 // Middleware
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '50mb' })); // Increase JSON payload limit for base64 images
+app.use(express.urlencoded({ limit: '50mb', extended: true })); // Increase URL-encoded payload limit
 app.use(express.static(__dirname));
 
 // Serve the form
@@ -62,13 +66,38 @@ app.post('/api/generate-proposal', upload.any(), async (req, res) => {
     
     // Process uploaded images
     const images = [];
+    
+    // Handle file uploads (from direct form submission)
     if (req.files && req.files.length > 0 && imageMetadata && imageMetadata.length > 0) {
       req.files.forEach((file, index) => {
         if (imageMetadata[index]) {
           images.push({
-            title: imageMetadata[index].title,
-            description: imageMetadata[index].description,
+            title: imageMetadata[index].title || '',
+            description: imageMetadata[index].description || '',
             imagePath: file.path
+          });
+        }
+      });
+    } 
+    // Handle base64 images (from preview page)
+    else if (imageMetadata && imageMetadata.length > 0) {
+      imageMetadata.forEach((imgData, index) => {
+        if (imgData.imageData) {
+          // Convert base64 to file
+          const base64Data = imgData.imageData.replace(/^data:image\/\w+;base64,/, '');
+          const buffer = Buffer.from(base64Data, 'base64');
+          
+          // Save to temp file
+          const uniqueSuffix = Date.now() + '-' + index;
+          const ext = imgData.fileType ? imgData.fileType.split('/')[1] : 'png';
+          const tempFilePath = path.join(uploadsDir, `${uniqueSuffix}.${ext}`);
+          
+          fs.writeFileSync(tempFilePath, buffer);
+          
+          images.push({
+            title: imgData.title || '',
+            description: imgData.description || '',
+            imagePath: tempFilePath
           });
         }
       });
@@ -113,7 +142,7 @@ app.post('/api/generate-proposal', upload.any(), async (req, res) => {
     
     console.log('✅ Proposal generated:', outputPath);
     
-    // Clean up uploaded files after processing
+    // Clean up uploaded and temporary files after processing
     if (req.files) {
       req.files.forEach(file => {
         try {
@@ -123,6 +152,17 @@ app.post('/api/generate-proposal', upload.any(), async (req, res) => {
         }
       });
     }
+    
+    // Clean up base64-converted image files
+    images.forEach(img => {
+      if (img.imagePath && img.imagePath.includes(uploadsDir)) {
+        try {
+          fs.unlinkSync(img.imagePath);
+        } catch (err) {
+          console.error('Error deleting temp image:', err);
+        }
+      }
+    });
 
     // Send data to n8n webhook
     const webhookPayload = {
