@@ -404,6 +404,36 @@
             margin-bottom: 8px;
         }
 
+        /* Auto-save indicator */
+        .autosave-indicator {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(26, 42, 74, 0.95);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            display: none;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        .autosave-indicator.show {
+            display: flex;
+        }
+
+        .autosave-indicator.saving {
+            background: rgba(59, 130, 246, 0.95);
+        }
+
+        .autosave-indicator.saved {
+            background: rgba(16, 185, 129, 0.95);
+        }
+
         @media (max-width: 768px) {
             .header {
                 flex-direction: column-reverse;
@@ -532,8 +562,9 @@
                             <span class="helper-text">Tiered pricing: 1=20€, 2=18€, 3=16€, 4=14€, 5+=12€ per view</span>
                         </div>
                         <div class="form-group">
-                            <label>Perspective Description</label>
-                            <textarea placeholder="e.g. South-East view, North-West view..."></textarea>
+                            <label>Description Details (Optional)</label>
+                            <textarea class="service-description" data-service="exterior-ground" placeholder="Add custom bullet points (one per line)&#10;e.g.:&#10;South-East view&#10;Evening lighting&#10;Garden perspective" rows="4"></textarea>
+                            <span class="helper-text">Add custom description points or leave empty for default</span>
                         </div>
                         <div class="price-display">
                             <span>Price: <strong><span class="service-price" data-service="exterior-ground">0,00 €</span></strong></span>
@@ -553,6 +584,11 @@
                             <input type="number" class="quantity-input" data-service="exterior-bird" min="0" value="0">
                             <span class="helper-text">Price: 12,00 € per view (only with ground perspectives)</span>
                         </div>
+                        <div class="form-group">
+                            <label>Description Details (Optional)</label>
+                            <textarea class="service-description" data-service="exterior-bird" placeholder="Add custom bullet points (one per line)" rows="3"></textarea>
+                            <span class="helper-text">Add custom description points or leave empty for default</span>
+                        </div>
                         <div class="price-display">
                             <span>Price: <strong><span class="service-price" data-service="exterior-bird">0,00 €</span></strong></span>
                         </div>
@@ -571,12 +607,16 @@
                             <input type="number" class="quantity-input" data-service="3d-floorplan" min="0" value="0">
                             <span class="helper-text">Price: 69,00 € per floor plan</span>
                         </div>
+                        <div class="form-group">
+                            <label>Description Details (Optional)</label>
+                            <textarea class="service-description" data-service="3d-floorplan" placeholder="Add custom bullet points (one per line)" rows="3"></textarea>
+                            <span class="helper-text">Add custom description points or leave empty for default</span>
+                        </div>
                         <div class="price-display">
                             <span>Price: <strong><span class="service-price" data-service="3d-floorplan">0,00 €</span></strong></span>
                         </div>
                     </div>
                 </div>
-
                 <!-- 3D Complete Floor View -->
                 <div class="service-item" id="service-3d-complete-floor">
                     <div class="service-header">
@@ -590,8 +630,9 @@
                             <span class="helper-text">Price: 199,00 € per floor</span>
                         </div>
                         <div class="form-group">
-                            <label>Units Description</label>
-                            <textarea placeholder="e.g. EG, 1. OG, 2. OG..."></textarea>
+                            <label>Description Details (Optional)</label>
+                            <textarea class="service-description" data-service="3d-complete-floor" placeholder="Add custom bullet points (one per line)&#10;e.g.:&#10;EG - Ground floor&#10;1. OG - First floor&#10;2. OG - Second floor" rows="4"></textarea>
+                            <span class="helper-text">Add custom description points or leave empty for default</span>
                         </div>
                         <div class="price-display">
                             <span>Price: <strong><span class="service-price" data-service="3d-complete-floor">0,00 €</span></strong></span>
@@ -610,6 +651,11 @@
                             <label>Number of Floor Plans *</label>
                             <input type="number" class="quantity-input" data-service="2d-floorplan" min="0" value="0">
                             <span class="helper-text">Price: 49,00 € per floor plan</span>
+                        </div>
+                        <div class="form-group">
+                            <label>Description Details (Optional)</label>
+                            <textarea class="service-description" data-service="2d-floorplan" placeholder="Add custom bullet points (one per line)" rows="3"></textarea>
+                            <span class="helper-text">Add custom description points or leave empty for default</span>
                         </div>
                         <div class="price-display">
                             <span>Price: <strong><span class="service-price" data-service="2d-floorplan">0,00 €</span></strong></span>
@@ -630,8 +676,9 @@
                             <span class="helper-text">Price: 99,00 € per photo</span>
                         </div>
                         <div class="form-group">
-                            <label>Rooms Description</label>
-                            <textarea placeholder="e.g. Wohnzimmer, Küche, Schlafzimmer..."></textarea>
+                            <label>Description Details (Optional)</label>
+                            <textarea class="service-description" data-service="home-staging" placeholder="Add custom bullet points (one per line)&#10;e.g.:&#10;Wohnzimmer - Living room&#10;Küche - Kitchen&#10;Schlafzimmer - Bedroom" rows="4"></textarea>
+                            <span class="helper-text">Add custom description points or leave empty for default</span>
                         </div>
                         <div class="price-display">
                             <span>Price: <strong><span class="service-price" data-service="home-staging">0,00 €</span></strong></span>
@@ -652,8 +699,9 @@
                             <span class="helper-text">Price: 139,00 € per photo</span>
                         </div>
                         <div class="form-group">
-                            <label>Rooms Description</label>
-                            <textarea placeholder="e.g. Bad, Küche..."></textarea>
+                            <label>Description Details (Optional)</label>
+                            <textarea class="service-description" data-service="renovation" placeholder="Add custom bullet points (one per line)&#10;e.g.:&#10;Bad - Bathroom&#10;Küche - Kitchen" rows="3"></textarea>
+                            <span class="helper-text">Add custom description points or leave empty for default</span>
                         </div>
                         <div class="price-display">
                             <span>Price: <strong><span class="service-price" data-service="renovation">0,00 €</span></strong></span>
@@ -674,8 +722,9 @@
                             <span class="helper-text">Price: 599,00 € per tour</span>
                         </div>
                         <div class="form-group">
-                            <label>Unit Description</label>
-                            <textarea placeholder="e.g. Apt. 1.02, Penthouse..."></textarea>
+                            <label>Description Details (Optional)</label>
+                            <textarea class="service-description" data-service="360-interior" placeholder="Add custom bullet points (one per line)&#10;e.g.:&#10;Apt. 1.02&#10;Penthouse" rows="3"></textarea>
+                            <span class="helper-text">Add custom description points or leave empty for default</span>
                         </div>
                         <div class="price-display">
                             <span>Price: <strong><span class="service-price" data-service="360-interior">0,00 €</span></strong></span>
@@ -695,6 +744,11 @@
                             <input type="number" class="quantity-input" data-service="360-exterior" min="0" value="0">
                             <span class="helper-text">Only in combination with min. 2x 3D-Außenvisualisierung</span>
                         </div>
+                        <div class="form-group">
+                            <label>Description Details (Optional)</label>
+                            <textarea class="service-description" data-service="360-exterior" placeholder="Add custom bullet points (one per line)" rows="3"></textarea>
+                            <span class="helper-text">Add custom description points or leave empty for default</span>
+                        </div>
                         <div class="price-display">
                             <span>Price: <strong><span class="service-price" data-service="360-exterior">0,00 €</span></strong></span>
                         </div>
@@ -712,6 +766,11 @@
                             <label>Number of Videos *</label>
                             <input type="number" class="quantity-input" data-service="slideshow" min="0" value="0">
                             <span class="helper-text">Price: 499,00 € per video</span>
+                        </div>
+                        <div class="form-group">
+                            <label>Description Details (Optional)</label>
+                            <textarea class="service-description" data-service="slideshow" placeholder="Add custom bullet points (one per line)" rows="3"></textarea>
+                            <span class="helper-text">Add custom description points or leave empty for default</span>
                         </div>
                         <div class="price-display">
                             <span>Price: <strong><span class="service-price" data-service="slideshow">0,00 €</span></strong></span>
@@ -731,6 +790,11 @@
                             <input type="number" class="quantity-input" data-service="site-plan" min="0" value="0">
                             <span class="helper-text">Price: 99,00 € per site plan</span>
                         </div>
+                        <div class="form-group">
+                            <label>Description Details (Optional)</label>
+                            <textarea class="service-description" data-service="site-plan" placeholder="Add custom bullet points (one per line)" rows="3"></textarea>
+                            <span class="helper-text">Add custom description points or leave empty for default</span>
+                        </div>
                         <div class="price-display">
                             <span>Price: <strong><span class="service-price" data-service="site-plan">0,00 €</span></strong></span>
                         </div>
@@ -748,6 +812,11 @@
                             <label>Number of Packages *</label>
                             <input type="number" class="quantity-input" data-service="social-media" min="0" value="0">
                             <span class="helper-text">Price: 299,00 € per package</span>
+                        </div>
+                        <div class="form-group">
+                            <label>Description Details (Optional)</label>
+                            <textarea class="service-description" data-service="social-media" placeholder="Add custom bullet points (one per line)" rows="3"></textarea>
+                            <span class="helper-text">Add custom description points or leave empty for default</span>
                         </div>
                         <div class="price-display">
                             <span>Price: <strong><span class="service-price" data-service="social-media">0,00 €</span></strong></span>
@@ -768,8 +837,9 @@
                             <span class="helper-text">Tiered pricing: 1=399€, 2=299€, 3=289€, 4=269€, 5=259€, 6=249€, 7=239€, 8=229€, 9=219€, 10+=199€</span>
                         </div>
                         <div class="form-group">
-                            <label>Rooms Description</label>
-                            <textarea placeholder="e.g. Wohnzimmer, Küche, Schlafzimmer, Bad..."></textarea>
+                            <label>Description Details (Optional)</label>
+                            <textarea class="service-description" data-service="interior" placeholder="Add custom bullet points (one per line)&#10;e.g.:&#10;Wohnzimmer - Living room&#10;Küche - Kitchen&#10;Schlafzimmer - Bedroom&#10;Bad - Bathroom" rows="4"></textarea>
+                            <span class="helper-text">Add custom description points or leave empty for default</span>
                         </div>
                         <div class="price-display">
                             <span>Price: <strong><span class="service-price" data-service="interior">0,00 €</span></strong></span>
@@ -790,8 +860,9 @@
                             <span class="helper-text">Preis nach Anfrage</span>
                         </div>
                         <div class="form-group">
-                            <label>Unit Description</label>
-                            <textarea placeholder="e.g. Terrasse Apt. 2.03..."></textarea>
+                            <label>Description Details (Optional)</label>
+                            <textarea class="service-description" data-service="terrace" placeholder="Add custom bullet points (one per line)&#10;e.g.:&#10;Terrasse Apt. 2.03&#10;Rooftop terrace" rows="3"></textarea>
+                            <span class="helper-text">Add custom description points or leave empty for default</span>
                         </div>
                         <div class="price-display">
                             <span>Price: <strong><span class="service-price" data-service="terrace">0,00 €</span></strong></span>
@@ -837,7 +908,7 @@
             <div class="button-group">
                 <button type="button" class="btn-secondary" onclick="resetForm()">🔄 Reset</button>
                 <button type="button" class="btn-primary" onclick="generateJSON()">📋 Generate JSON</button>
-                <button type="submit" class="btn-primary">📄 Generate Proposal</button>
+                <button type="button" class="btn-primary" onclick="previewProposal()">👁️ Preview Proposal</button>
             </div>
 
             <!-- JSON Output -->
@@ -846,7 +917,147 @@
         </form>
     </div>
 
+    <!-- Auto-save Indicator -->
+    <div id="autosaveIndicator" class="autosave-indicator">
+        <span id="autosaveIcon">💾</span>
+        <span id="autosaveText">Saved</span>
+    </div>
+
     <script>
+        // ========== DATA PERSISTENCE ==========
+        const STORAGE_KEY = 'proposalFormData';
+        const AUTOSAVE_INTERVAL = 5000; // Auto-save every 5 seconds
+        let autoSaveTimer = null;
+
+        // Load saved data on page load
+        function loadSavedData() {
+            const savedData = localStorage.getItem(STORAGE_KEY);
+            if (!savedData) return;
+
+            try {
+                const data = JSON.parse(savedData);
+                console.log('Loading saved form data...');
+
+                // Restore client information
+                if (data.clientInfo) {
+                    document.getElementById('clientNumber').value = data.clientInfo.clientNumber || '';
+                    document.getElementById('companyName').value = data.clientInfo.companyName || '';
+                    document.getElementById('street').value = data.clientInfo.street || '';
+                    document.getElementById('postalCode').value = data.clientInfo.postalCode || '';
+                    document.getElementById('city').value = data.clientInfo.city || '';
+                    document.getElementById('country').value = data.clientInfo.country || '';
+                }
+
+                // Restore project information
+                if (data.projectInfo) {
+                    document.getElementById('projectNumber').value = data.projectInfo.projectNumber || '';
+                    document.getElementById('projectName').value = data.projectInfo.projectName || '';
+                    document.getElementById('unitCount').value = data.projectInfo.unitCount || '';
+                    document.getElementById('deliveryDays').value = data.projectInfo.deliveryDays || '14';
+                    if (data.projectInfo.offerValidUntil) {
+                        document.getElementById('offerValidUntil').value = data.projectInfo.offerValidUntil;
+                    }
+                }
+
+                // Restore services
+                if (data.services) {
+                    data.services.forEach(savedService => {
+                        const serviceItem = findServiceItemByName(savedService.name);
+                        if (serviceItem) {
+                            const checkbox = serviceItem.querySelector('input[type="checkbox"]');
+                            const quantityInput = serviceItem.querySelector('.quantity-input');
+                            
+                            if (checkbox) {
+                                checkbox.checked = true;
+                                serviceItem.classList.add('active');
+                            }
+                            
+                            if (quantityInput && savedService.quantity) {
+                                quantityInput.value = savedService.quantity;
+                            }
+                        }
+                    });
+                }
+
+                updateCalculations();
+                console.log('✅ Form data restored from localStorage');
+            } catch (error) {
+                console.error('Error loading saved data:', error);
+            }
+        }
+
+        // Find service item by service name
+        function findServiceItemByName(serviceName) {
+            const serviceItems = document.querySelectorAll('.service-item');
+            for (const item of serviceItems) {
+                const label = item.querySelector('.service-header label');
+                if (label && label.textContent.trim() === serviceName) {
+                    return item;
+                }
+            }
+            return null;
+        }
+
+        // Save form data to localStorage
+        function saveFormData() {
+            try {
+                showSaveIndicator();
+                const data = collectFormData();
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+                console.log('💾 Form data auto-saved');
+                showSavedIndicator();
+            } catch (error) {
+                console.error('Error saving form data:', error);
+            }
+        }
+
+        // Start auto-save
+        function startAutoSave() {
+            if (autoSaveTimer) clearInterval(autoSaveTimer);
+            
+            autoSaveTimer = setInterval(() => {
+                saveFormData();
+            }, AUTOSAVE_INTERVAL);
+        }
+
+        // Clear saved data
+        function clearSavedData() {
+            localStorage.removeItem(STORAGE_KEY);
+            localStorage.removeItem('proposalPreviewData');
+            console.log('🗑️ Saved form data cleared');
+        }
+
+        // Add save indicator
+        function showSaveIndicator() {
+            const indicator = document.getElementById('autosaveIndicator');
+            const icon = document.getElementById('autosaveIcon');
+            const text = document.getElementById('autosaveText');
+            
+            indicator.classList.remove('saved');
+            indicator.classList.add('saving', 'show');
+            icon.textContent = '⏳';
+            text.textContent = 'Saving...';
+        }
+
+        // Show saved indicator
+        function showSavedIndicator() {
+            const indicator = document.getElementById('autosaveIndicator');
+            const icon = document.getElementById('autosaveIcon');
+            const text = document.getElementById('autosaveText');
+            
+            indicator.classList.remove('saving');
+            indicator.classList.add('saved', 'show');
+            icon.textContent = '✅';
+            text.textContent = 'Saved';
+            
+            // Hide after 2 seconds
+            setTimeout(() => {
+                indicator.classList.remove('show');
+            }, 2000);
+        }
+
+        // ========== END DATA PERSISTENCE ==========
+
         // Pricing tiers
         const pricing = {
             'exterior-ground': (qty) => {
@@ -897,12 +1108,21 @@
                     if (quantityInput) quantityInput.value = 0;
                     updateCalculations();
                 }
+                saveFormData(); // Auto-save on service change
             });
         });
 
         // Update calculations on quantity change
         document.querySelectorAll('.quantity-input').forEach(input => {
-            input.addEventListener('input', updateCalculations);
+            input.addEventListener('input', function() {
+                updateCalculations();
+                saveFormData(); // Auto-save on quantity change
+            });
+        });
+
+        // Add auto-save to all input fields
+        document.querySelectorAll('input, select, textarea').forEach(field => {
+            field.addEventListener('change', saveFormData);
         });
 
         function updateCalculations() {
@@ -969,21 +1189,19 @@
                 </div>
                 
                 <div class="form-group">
-                    <label>Image Title *</label>
+                    <label>Image Title</label>
                     <input type="text" 
                            class="image-title-input" 
                            data-image="${imageCounter}"
-                           placeholder="e.g. Perspektive 1 - Hauptansicht"
-                           required>
+                           placeholder="e.g. Perspektive 1 - Hauptansicht">
                 </div>
                 
                 <div class="form-group">
-                    <label>Image Description *</label>
+                    <label>Image Description</label>
                     <textarea class="image-description-input" 
                               data-image="${imageCounter}"
                               placeholder="e.g. Ansicht der Immobilie von Süden mit optimaler Beleuchtung"
-                              rows="3"
-                              required></textarea>
+                              rows="3"></textarea>
                 </div>
                 
                 <div class="form-group">
@@ -1000,9 +1218,8 @@
                            data-image="${imageCounter}"
                            accept="image/png,image/jpeg,image/jpg"
                            style="display: none;"
-                           onchange="handleImageUpload(${imageCounter})"
-                           required>
-                    <span class="helper-text">This image will be included in the proposal document</span>
+                           onchange="handleImageUpload(${imageCounter})">
+                    <span class="helper-text">Optional: This image will be included in the proposal document</span>
                 </div>
             `;
             
@@ -1054,14 +1271,18 @@
                 const titleInput = item.querySelector('.image-title-input');
                 const descriptionInput = item.querySelector('.image-description-input');
                 const fileInput = item.querySelector('.image-file-input');
+                const preview = item.querySelector('.image-preview');
                 
-                if (titleInput && descriptionInput && fileInput && fileInput.files[0]) {
+                // Include images even if title/description are optional
+                if (fileInput && fileInput.files[0]) {
                     images.push({
-                        title: titleInput.value,
-                        description: descriptionInput.value,
+                        title: titleInput ? titleInput.value.trim() : '',
+                        description: descriptionInput ? descriptionInput.value.trim() : '',
                         fileName: fileInput.files[0].name,
                         fileSize: fileInput.files[0].size,
-                        fileType: fileInput.files[0].type
+                        fileType: fileInput.files[0].type,
+                        // Store image data URL for preview
+                        imageData: preview && preview.src ? preview.src : null
                     });
                 }
             });
@@ -1093,6 +1314,19 @@
                 const quantity = parseInt(quantityInput?.value) || 0;
                 const service = quantityInput?.dataset.service;
                 
+                // Get custom description if provided
+                const descriptionTextarea = item.querySelector('.service-description');
+                const customDescription = descriptionTextarea?.value.trim();
+                let descriptionArray = null;
+                
+                if (customDescription) {
+                    // Split by newlines and filter empty lines
+                    descriptionArray = customDescription
+                        .split('\n')
+                        .map(line => line.trim())
+                        .filter(line => line.length > 0);
+                }
+                
                 if (service && quantity > 0) {
                     const priceFunc = pricing[service];
                     let unitPrice, serviceTotal;
@@ -1107,12 +1341,19 @@
                     
                     totalNet += serviceTotal;
                     
-                    services.push({
+                    const serviceData = {
                         name: serviceName,
                         quantity: quantity,
                         unitPrice: formatPriceForJSON(unitPrice),
                         totalPrice: formatPriceForJSON(serviceTotal)
-                    });
+                    };
+                    
+                    // Add custom description if provided
+                    if (descriptionArray && descriptionArray.length > 0) {
+                        serviceData.customDescription = descriptionArray;
+                    }
+                    
+                    services.push(serviceData);
                 }
             });
 
@@ -1167,7 +1408,7 @@
         }
 
         function resetForm() {
-            if (confirm('Are you sure you want to reset the form?')) {
+            if (confirm('Are you sure you want to reset the form? This will clear all saved data.')) {
                 document.getElementById('proposalForm').reset();
                 document.querySelectorAll('.service-item').forEach(item => {
                     item.classList.remove('active');
@@ -1178,69 +1419,43 @@
                 document.getElementById('imagesContainer').innerHTML = '';
                 imageCounter = 0;
                 updateCalculations();
+                clearSavedData(); // Clear saved data
             }
         }
 
-        // Form submission
-        document.getElementById('proposalForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            // Show loading state
-            const submitBtn = this.querySelector('button[type="submit"]');
-            const originalText = submitBtn.textContent;
-            submitBtn.textContent = '⏳ Generating...';
-            submitBtn.disabled = true;
-            
-            try {
-                const data = collectFormData();
-                
-                // Create FormData for file uploads
-                const formData = new FormData();
-                formData.append('data', JSON.stringify(data));
-                
-                // Add image files
-                const imageItems = document.querySelectorAll('.image-item');
-                imageItems.forEach((item, index) => {
-                    const fileInput = item.querySelector('.image-file-input');
-                    if (fileInput && fileInput.files[0]) {
-                        formData.append(`image-${index}`, fileInput.files[0]);
-                    }
-                });
-                
-                console.log('Submitting proposal with', imageItems.length, 'images');
-                
-                // Send to local server
-                const apiUrl = 'http://localhost:3000/api/generate-proposal';
-                
-                const response = await fetch(apiUrl, {
-                    method: 'POST',
-                    body: formData
-                });
-                
-                const result = await response.json();
-                
-                if (response.ok && result.success) {
-                    alert(`✅ Proposal created successfully!\n\nOffer Number: ${result.offerNumber}\nClient: ${result.clientName}\nTotal: ${result.totalAmount} €\nImages: ${result.imagesIncluded}`);
-                    console.log('Response:', result);
-                    
-                    // Download the file
-                    if (result.fileUrl) {
-                        window.open(result.fileUrl, '_blank');
-                    }
-                    
-                    // Show JSON
-                    generateJSON();
-                } else {
-                    throw new Error(result.error || 'Failed to create proposal');
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                alert(`❌ Error creating proposal:\n${error.message}\n\nMake sure the server is running (node proposal-server.js)`);
-            } finally {
-                // Reset button
-                submitBtn.textContent = originalText;
-                submitBtn.disabled = false;
+        // Preview proposal function
+        function previewProposal() {
+            // Validate required fields
+            const companyName = document.getElementById('companyName').value;
+            const street = document.getElementById('street').value;
+            const postalCode = document.getElementById('postalCode').value;
+            const city = document.getElementById('city').value;
+            const country = document.getElementById('country').value;
+
+            if (!companyName || !street || !postalCode || !city || !country) {
+                alert('Please fill in all required client information fields.');
+                return;
             }
+
+            // Check if at least one service is selected
+            const services = collectFormData().services;
+            if (services.length === 0) {
+                alert('Please select at least one service.');
+                return;
+            }
+
+            // Store data in localStorage for preview
+            const data = collectFormData();
+            localStorage.setItem('proposalPreviewData', JSON.stringify(data));
+
+            // Open preview page
+            window.open('preview.html', '_blank');
+        }
+
+        // Form submission - now deprecated in favor of preview
+        document.getElementById('proposalForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('Please use the "Preview Proposal" button to view and generate your proposal.');
         });
 
         // Set default date (2 weeks from now)
@@ -1248,8 +1463,17 @@
         twoWeeksLater.setDate(twoWeeksLater.getDate() + 14);
         document.getElementById('offerValidUntil').valueAsDate = twoWeeksLater;
 
-        // Initialize calculations
-        updateCalculations();
+        // Initialize on page load
+        window.addEventListener('DOMContentLoaded', function() {
+            loadSavedData(); // Load saved data
+            startAutoSave(); // Start auto-save
+            updateCalculations();
+        });
+
+        // Save before leaving page
+        window.addEventListener('beforeunload', function() {
+            saveFormData();
+        });
     </script>
 </body>
 </html>

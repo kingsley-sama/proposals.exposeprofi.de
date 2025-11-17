@@ -31,10 +31,127 @@ class PureDocxProposalGenerator {
     };
     this.offerNumber = `2025-${this.data.MM}-${this.data.DD}-1`;
     
+    // Service descriptions mapping
+    this.serviceDescriptions = this.getServiceDescriptions();
+    
     // Calculate pricing if services are provided
     if (this.data.services.length > 0) {
       this.calculatePricing();
     }
+  }
+
+  /**
+   * Get service descriptions for dynamic table generation
+   */
+  getServiceDescriptions() {
+    return {
+      '3D-Außenvisualisierung Bodenperspektive': {
+        description: [
+          'Fotorealistische 3D-Visualisierung aus Bodenperspektive',
+          'Hochauflösende Darstellung (min. 3000px)',
+          'Professionelle Lichtsetzung und Materialisierung',
+          'Umgebungsgestaltung mit Vegetation und Kontext'
+        ],
+        link: 'https://www.exposeprofi.de/3d-visualisierungen/architekturvisualisierungen'
+      },
+      '3D-Außenvisualisierung Vogelperspektive': {
+        description: [
+          'Fotorealistische Vogelperspektive',
+          'Ideal für Gesamtübersicht des Projekts',
+          'Nur in Kombination mit Bodenperspektiven'
+        ]
+      },
+      '3D-Grundriss': {
+        description: [
+          'Fotorealistischer 3D-Grundriss',
+          'Möblierte Darstellung',
+          'Hochauflösende Qualität'
+        ],
+        link: 'https://www.exposeprofi.de/3d-grundrisse'
+      },
+      '3D-Geschossansicht': {
+        description: [
+          'Komplette 3D-Ansicht eines Geschosses',
+          'Alle Wohnungen in einem Geschoss',
+          'Möblierte Darstellung'
+        ]
+      },
+      '2D-Grundriss': {
+        description: [
+          'Professioneller 2D-Grundriss',
+          'Bemaßung und Flächenangaben',
+          'Druckfertige Qualität'
+        ],
+        link: 'https://www.exposeprofi.de/2d-grundrisse'
+      },
+      'Digital Home Staging': {
+        description: [
+          'Digitale Möblierung leerer Räume',
+          'Fotorealistische Integration',
+          'Verschiedene Einrichtungsstile'
+        ],
+        link: 'https://www.exposeprofi.de/home-staging'
+      },
+      'Digitale Renovierung': {
+        description: [
+          'Digitale Aufbereitung alter Räume',
+          'Visualisierung von Renovierungspotential',
+          'Fotorealistische Darstellung'
+        ]
+      },
+      '360° Tour Innen': {
+        description: [
+          'Interaktive 360° Innenraumtour',
+          'Navigation durch alle Räume',
+          'Einbettbar auf Website'
+        ],
+        link: 'https://www.exposeprofi.de/360-grad-touren'
+      },
+      '360° Video Außen': {
+        description: [
+          '360° Außenansicht Video',
+          'Nur mit min. 2x 3D-Außenvisualisierung',
+          'Preis auf Anfrage'
+        ]
+      },
+      'Slideshow Video': {
+        description: [
+          'Professionelles Slideshow-Video',
+          'Musik und Übergänge',
+          'Ideal für Social Media'
+        ]
+      },
+      '3D-Lageplan': {
+        description: [
+          '3D-Darstellung der Lage',
+          'Umgebungskontext',
+          'Verkehrsanbindung'
+        ]
+      },
+      'Social Media Paket': {
+        description: [
+          'Optimierte Bilder für Social Media',
+          'Verschiedene Formate',
+          'Stories und Posts'
+        ]
+      },
+      '3D-Innenvisualisierung': {
+        description: [
+          'Fotorealistische Innenraumvisualisierung',
+          'Hochauflösende Darstellung',
+          'Professionelle Lichtsetzung',
+          'Verschiedene Perspektiven möglich'
+        ],
+        link: 'https://www.exposeprofi.de/3d-visualisierungen/innenvisualisierungen'
+      },
+      '3D-Visualisierung Terrasse': {
+        description: [
+          'Fotorealistische Terrassenvisualisierung',
+          'Mit Möblierung und Bepflanzung',
+          'Preis auf Anfrage'
+        ]
+      }
+    };
   }
 
   /**
@@ -304,21 +421,106 @@ class PureDocxProposalGenerator {
   /**
    * Create one unified service table with all rows
    * Table will naturally flow across pages
+   * NOW DYNAMIC: Only includes selected services
    */
   createUnifiedServiceTable() {
     const allRows = [
       this.createTableHeaderRow(),
-      ...this.createPage1ServiceRows(),
-      ...this.createPage2ServiceRows(),
-      ...this.createPage3ServiceRows(),
-      ...this.createPage4ServiceRows(),
+      ...this.createDynamicServiceRows(),
     ];
 
     return new Table({
       width: { size: 100, type: WidthType.PERCENTAGE },
       rows: allRows,
       cantSplit: false, // Allow table to break across pages
+      margins: {
+        bottom: 600, // Add bottom margin to prevent touching footer (600 twips = ~0.4 inches)
+      },
     });
+  }
+
+  /**
+   * Create dynamic service rows based on selected services
+   */
+  createDynamicServiceRows() {
+    if (!this.data.services || this.data.services.length === 0) {
+      // Return empty row if no services
+      return [
+        new TableRow({
+          children: [
+            new TableCell({
+              width: { size: 100, type: WidthType.PERCENTAGE },
+              columnSpan: 4,
+              children: [
+                new Paragraph({
+                  alignment: AlignmentType.CENTER,
+                  children: [new TextRun({ text: 'Keine Dienste ausgewählt', size: 18, italics: true, color: '666666' })],
+                }),
+              ],
+            }),
+          ],
+        }),
+      ];
+    }
+
+    const rows = [];
+
+    this.data.services.forEach((service, index) => {
+      const serviceInfo = this.serviceDescriptions[service.name];
+      
+      // Use custom description if provided, otherwise use default
+      let description;
+      if (service.customDescription && service.customDescription.length > 0) {
+        description = service.customDescription;
+      } else {
+        description = serviceInfo ? serviceInfo.description : ['Beschreibung nicht verfügbar'];
+      }
+      
+      const link = serviceInfo ? serviceInfo.link : null;
+
+      rows.push(
+        new TableRow({
+          children: [
+            // Column 1: Quantity
+            new TableCell({
+              width: { size: 8, type: WidthType.PERCENTAGE },
+              verticalAlign: VerticalAlign.CENTER,
+              children: [
+                new Paragraph({
+                  alignment: AlignmentType.CENTER,
+                  children: [new TextRun({ text: String(service.quantity), size: 18 })],
+                }),
+              ],
+            }),
+            // Column 2: Designation
+            new TableCell({
+              width: { size: 28, type: WidthType.PERCENTAGE },
+              verticalAlign: VerticalAlign.TOP,
+              children: [
+                new Paragraph({
+                  children: [new TextRun({ text: service.name, size: 18, bold: true })],
+                }),
+              ],
+            }),
+            // Column 3: Description (bullet points)
+            this.createBulletListCell(description, 54, link),
+            // Column 4: Unit Price
+            new TableCell({
+              width: { size: 10, type: WidthType.PERCENTAGE },
+              verticalAlign: VerticalAlign.CENTER,
+              children: [
+                new Paragraph({
+                  alignment: AlignmentType.CENTER,
+                  children: [new TextRun({ text: service.unitPrice + ' €', size: 18 })],
+                }),
+              ],
+            }),
+          ],
+        })
+      );
+    });
+
+    return rows;
   }
 
   /**
@@ -830,6 +1032,9 @@ class PureDocxProposalGenerator {
       }),
       new Table({
         width: { size: 100, type: WidthType.PERCENTAGE },
+        margins: {
+          bottom: 600, // Add bottom margin to prevent touching footer
+        },
         rows: [
           new TableRow({
             children: [

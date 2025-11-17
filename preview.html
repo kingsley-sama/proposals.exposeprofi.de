@@ -1,0 +1,1147 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Proposal Preview - ExposeProfi.de</title>
+  <style>
+    /* ========== RESET ========== */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    /* ========== PREVIEW TOOLBAR ========== */
+    .preview-toolbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: linear-gradient(135deg, #1a2a4a 0%, #253550 100%);
+      padding: 16px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      z-index: 1000;
+    }
+
+    .preview-toolbar h1 {
+      color: white;
+      font-size: 20px;
+      font-weight: 600;
+    }
+
+    .preview-toolbar-actions {
+      display: flex;
+      gap: 12px;
+    }
+
+    .toolbar-btn {
+      padding: 10px 24px;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .btn-back {
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+    }
+
+    .btn-back:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    .btn-generate {
+      background: #10b981;
+      color: white;
+    }
+
+    .btn-generate:hover {
+      background: #059669;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+    }
+
+    .btn-generate:disabled {
+      background: #6b7280;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* ========== PAGE STYLE (Word Document Feel) ========== */
+    body {
+      font-family: "Calibri", "Arial", sans-serif;
+      font-size: 11pt;
+      line-height: 1.5;
+      background: #f9f9f9;
+      color: #000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 80px 20px 40px 20px; /* Top padding for toolbar */
+    }
+
+    .page {
+      width: 793px;
+      min-height: 1122px;
+      max-width: 793px;
+      padding: 96px;
+      margin-bottom: 40px;
+      background: white;
+      box-shadow: 0 0 8px rgba(0, 0, 0, 0.15);
+      border: 1px solid #dcdcdc;
+      display: flex;
+      flex-direction: column;
+      page-break-after: always;
+      position: relative;
+      box-sizing: border-box;
+    }
+
+    .page:last-child {
+      margin-bottom: 0;
+    }
+
+    .page-content {
+      flex: 1;
+      padding-bottom: 100px;
+      min-height: 930px; /* Ensure minimum content height */
+    }
+
+    /* Services table page */
+    #servicesTable {
+      margin-bottom: 40px;
+    }
+
+    /* Ensure pricing summary starts on new page if needed */
+    .section-title {
+      page-break-after: avoid;
+    }
+
+    /* ========== PAGE ONE STYLES ========== */
+    .exposeprofi-logo {
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: 24px;
+    }
+
+    .exposeprofi-logo img {
+      max-width: 320px;
+      height: auto;
+    }
+
+    .header-left {
+      font-size: 11pt;
+      color: #022e64;
+      margin-bottom: 8px;
+    }
+
+    .recipient-address {
+      margin-top: 16px;
+      margin-bottom: 24px;
+      line-height: 1.4;
+      font-size: 11pt;
+    }
+
+    .date-offer {
+      margin-bottom: 32px;
+      text-align: right;
+      font-size: 11pt;
+    }
+
+    .offer-number-section {
+      font-weight: bold;
+      font-size: 16pt;
+      margin-bottom: 16px;
+    }
+
+    .intro-text {
+      text-align: justify;
+      margin-bottom: 12px;
+      font-size: 11pt;
+    }
+
+    .benefits-list {
+      margin: 28px 0;
+      font-size: 12pt;
+      line-height: 1.6;
+    }
+
+    .benefits-list > div {
+      margin-bottom: 8px;
+      text-align: justify;
+    }
+
+    .benefits-list strong {
+      font-weight: bold;
+    }
+
+    /* ========== PAGE TWO+ STYLES ========== */
+    .header-text {
+      margin-bottom: 16px;
+      font-size: 10pt;
+      line-height: 1.4;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 24px;
+      font-size: 9pt;
+      page-break-inside: auto;
+    }
+
+    tr {
+      page-break-inside: avoid;
+      page-break-after: auto;
+    }
+
+    thead {
+      display: table-header-group;
+    }
+
+    tbody {
+      display: table-row-group;
+    }
+
+    th, td {
+      border: 1px solid #333;
+      padding: 5px 6px;
+      text-align: left;
+      vertical-align: top;
+      line-height: 1.3;
+    }
+
+    th {
+      background-color: #f0f0f0;
+      font-weight: bold;
+      text-align: center;
+      font-size: 9pt;
+    }
+
+    .col-number {
+      width: 8%;
+      text-align: center;
+    }
+
+    .col-designation {
+      width: 28%;
+    }
+
+    .col-description {
+      width: 54%;
+    }
+
+    .col-price {
+      width: 10%;
+      text-align: center;
+    }
+
+    ul {
+      margin: 4px 0 4px 14px;
+      padding-left: 0;
+    }
+
+    li {
+      margin-bottom: 2px;
+      line-height: 1.3;
+    }
+
+    /* Editable fields */
+    .editable {
+      cursor: text;
+      transition: background-color 0.2s;
+    }
+
+    .editable:hover {
+      background-color: #fffbeb;
+    }
+
+    .editable:focus {
+      outline: 2px solid #3b82f6;
+      outline-offset: -2px;
+      background-color: #fef3c7;
+    }
+
+    .editable-bullet {
+      cursor: text;
+      transition: background-color 0.2s;
+      padding: 2px 4px;
+      border-radius: 2px;
+    }
+
+    .editable-bullet:hover {
+      background-color: #fffbeb;
+    }
+
+    .editable-bullet:focus {
+      outline: 2px solid #3b82f6;
+      outline-offset: -2px;
+      background-color: #fef3c7;
+    }
+
+    .edit-hint {
+      font-size: 9px;
+      color: #6b7280;
+      font-style: italic;
+      margin-top: 4px;
+    }
+
+    .section-title {
+      font-weight: bold;
+      margin-top: 16px;
+      margin-bottom: 8px;
+      font-size: 11pt;
+    }
+
+    .pricing-summary {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 16px;
+    }
+
+    .summary-row {
+      border: 1px solid #333;
+    }
+
+    .summary-label {
+      padding: 6px 8px;
+      width: 70%;
+      border: 1px solid #333;
+    }
+
+    .summary-value {
+      padding: 6px 8px;
+      width: 30%;
+      text-align: center;
+      border: 1px solid #333;
+    }
+
+    .footnote {
+      font-size: 8.5pt;
+      margin-top: 16px;
+      line-height: 1.4;
+    }
+
+    /* ========== FOOTER ========== */
+    .page-footer {
+      position: absolute;
+      bottom: 48px;
+      left: 96px;
+      right: 96px;
+      padding-top: 8px;
+      border-top: none;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      font-size: 7pt;
+      line-height: 1.2;
+      background: white;
+    }
+
+    .footer-column {
+      flex: 1;
+      margin-right: 12px;
+      min-width: 0;
+    }
+
+    .footer-column:last-child {
+      margin-right: 0;
+    }
+
+    .footer-column p {
+      margin: 1px 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-size: 7pt;
+    }
+
+    .company-name {
+      font-weight: bold;
+      font-size: 8pt;
+      margin-bottom: 3px;
+    }
+
+    .reference {
+      color: #0066cc;
+      text-decoration: none;
+    }
+
+    /* Empty state */
+    .empty-state {
+      text-align: center;
+      padding: 40px;
+      color: #6b7280;
+      font-style: italic;
+    }
+
+    /* Perspective images */
+    .perspective-image-item {
+      margin-bottom: 32px;
+      page-break-inside: avoid;
+    }
+
+    .perspective-image-title {
+      font-weight: bold;
+      font-size: 11pt;
+      margin-bottom: 8px;
+      color: #1a2a4a;
+    }
+
+    .perspective-image-description {
+      font-size: 10pt;
+      margin-bottom: 12px;
+      text-align: justify;
+      line-height: 1.4;
+    }
+
+    .perspective-image-preview {
+      width: 100%;
+      max-width: 600px;
+      height: auto;
+      border-radius: 4px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      margin: 0 auto;
+      display: block;
+    }
+
+    /* ========== PRINT ========== */
+    @media print {
+      .preview-toolbar {
+        display: none;
+      }
+
+      body {
+        background: white;
+        padding: 0;
+      }
+      
+      .page {
+        box-shadow: none;
+        border: none;
+        width: 8.27in;
+        height: 11.69in;
+        padding: 1in;
+        margin: 0;
+        page-break-after: always;
+        box-sizing: border-box;
+      }
+      
+      .page:last-child {
+        page-break-after: avoid;
+      }
+      
+      .page-footer {
+        position: absolute;
+        bottom: 0.5in;
+        left: 1in;
+        right: 1in;
+      }
+      
+      table {
+        page-break-inside: auto;
+      }
+      
+      tr {
+        page-break-inside: avoid;
+        page-break-after: auto;
+      }
+      
+      thead {
+        display: table-header-group;
+      }
+    }
+    
+    @page {
+      size: 8.27in 11.69in;
+      margin: 0;
+    }
+  </style>
+</head>
+<body>
+  <!-- Preview Toolbar -->
+  <div class="preview-toolbar">
+    <h1>📄 Proposal Preview</h1>
+    <div class="preview-toolbar-actions">
+      <button class="toolbar-btn btn-back" onclick="goBack()">← Back to Form</button>
+      <button class="toolbar-btn btn-generate" onclick="generateProposal()" id="generateBtn">
+        📄 Generate DOCX
+      </button>
+    </div>
+  </div>
+
+  <!-- ========================================
+       PAGE 0: COVER / INTRODUCTION
+       ======================================== -->
+  <div class="page">
+    <div class="page-content">
+      <!-- Header -->
+      <div class="exposeprofi-logo">
+        <img src="6363f6e55943431f0f248941_logo exposeprofi blau-p-500.png" alt="ExposeProfi.de">
+      </div>
+      <div class="header-left">
+        ExposeProfi.de | EPCS GmbH | Bruder-Klaus-Straße 3a | 78467 Konstanz
+      </div>
+
+      <!-- Recipient Address -->
+      <div class="recipient-address">
+        <div class="address-block">
+          <span class="company-name" id="preview-companyName"></span><br>
+          <span id="preview-street"></span><br>
+          <span><span id="preview-postalCode"></span> <span id="preview-city"></span></span><br>
+          <span id="preview-country"></span>
+        </div>
+      </div>
+
+      <!-- Date and Offer Number -->
+      <div class="date-offer">
+        <div id="preview-date"></div>
+      </div>
+
+      <!-- Introduction -->
+      <div class="offer-number-section">
+        Angebot Nr. <span id="preview-offerNumber"></span>
+      </div>
+      <div class="intro-text">
+        Vielen Dank für Ihre Anfrage und Ihr damit verbundenes Interesse an einer Zusammenarbeit.
+      </div>
+
+      <div class="intro-text">
+        <strong>Die Vorteile zusammengefasst, die Sie erwarten können:</strong>
+      </div>
+
+      <!-- Benefits List -->
+      <div class="benefits-list">
+        <div><strong>1. Fotorealismus:</strong> Wir erstellen ausschließlich emotionale 3D-Visualisierungen der höchsten Qualitätsstufe.</div>
+        <div><strong>2. Persönliche & individuelle Betreuung:</strong> Sie erhalten bei jedem Projekt die Unterstützung von einem persönlichen Ansprechpartner, der die Visualisierungen individuell für Sie erstellt und immer per Telefon oder Email erreichbar ist.</div>
+        <div><strong>3. Effiziente Prozesse & schnelle Lieferzeit:</strong> Wie Sie sehen, melden wir uns innerhalb von 24h mit einem Angebot bei Ihnen. Ihr Projekt verläuft ab Start ebenso reibungslos und Sie erhalten die Visualisierungen schnellstmöglich.</div>
+        <div><strong>4. Korrekturschleifen:</strong> Falls Sie Änderungswünsche haben, bieten wir Ihnen ein eigenes Tool, mit dem Sie direkt in der Visualisierung Kommentare hinterlassen können. Das spart Zeit und Missverständnisse.</div>
+        <div><strong>5. Preiswert:</strong> Aufgrund effizienter Prozesse bieten wir günstigere Preise bei gleicher Qualität und besserer Betreuung.</div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="page-footer">
+      <div class="footer-column">
+        <p class="company-name">ExposeProfi.de</p>
+        <p>EPCS GmbH</p>
+        <p>GF: Christopher Helm</p>
+        <p>Bruder-Klaus-Str. 3a, 78467 Konstanz</p>
+        <p>HRB 725172, Amtsgericht Freiburg</p>
+        <p>St.-Nr: 0908011277</p>
+        <p>USt-ID: DE347265281</p>
+      </div>
+
+      <div class="footer-column">
+        <p class="company-name">Bankverbindung</p>
+        <p>Qonto (Banque de France)</p>
+        <p>IBAN DE62100101239488471916</p>
+      </div>
+
+      <div class="footer-column">
+        <p>Email: christopher.helm@exposeprofi.de</p>
+        <p>Web: www.exposeprofi.de</p>
+        <p>Tel: +49-7531-1227491</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================
+       PAGE 1: SERVICES TABLE
+       ======================================== -->
+  <div class="page">
+    <div class="page-content">
+      <!-- Header -->
+      <div class="header-text">
+        <strong>Basierend auf den zugesandten Unterlagen unterbreiten wir Ihnen folgendes Angebot:</strong>
+      </div>
+
+      <!-- Dynamic Services Table -->
+      <table id="servicesTable">
+        <thead>
+          <tr>
+            <th class="col-number">Anzahl</th>
+            <th class="col-designation">Bezeichnung</th>
+            <th class="col-description">Beschreibung</th>
+            <th class="col-price">Stückpreis netto</th>
+          </tr>
+        </thead>
+        <tbody id="servicesTableBody">
+          <tr>
+            <td colspan="4" class="empty-state">No services selected. Please select services in the form.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Footer -->
+    <div class="page-footer">
+      <div class="footer-column">
+        <p class="company-name">ExposeProfi.de</p>
+        <p>EPCS GmbH</p>
+        <p>GF: Christopher Helm</p>
+        <p>Bruder-Klaus-Str. 3a, 78467 Konstanz</p>
+        <p>HRB 725172, Amtsgericht Freiburg</p>
+        <p>St.-Nr: 0908011277</p>
+        <p>USt-ID: DE347265281</p>
+      </div>
+
+      <div class="footer-column">
+        <p class="company-name">Bankverbindung</p>
+        <p>Qonto (Banque de France)</p>
+        <p>IBAN DE62100101239488471916</p>
+      </div>
+
+      <div class="footer-column">
+        <p>Email: christopher.helm@exposeprofi.de</p>
+        <p>Web: www.exposeprofi.de</p>
+        <p>Tel: +49-7531-1227491</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================
+       PAGE 2: PRICING SUMMARY
+       ======================================== -->
+  <div class="page">
+    <div class="page-content">
+      <!-- PRICING SUMMARY -->
+      <div class="section-title">Zusammenfassung:</div>
+      <table class="pricing-summary">
+        <tbody>
+          <tr class="summary-row">
+            <td class="summary-label"><strong>Gesamtnettopreis</strong></td>
+            <td class="summary-value"><strong id="preview-totalNet">0,00 €</strong></td>
+          </tr>
+          <tr class="summary-row">
+            <td class="summary-label"><strong>MwSt. (19%)</strong></td>
+            <td class="summary-value"><strong id="preview-totalVat">0,00 €</strong></td>
+          </tr>
+          <tr class="summary-row">
+            <td class="summary-label"><strong>Gesamtbruttopreis</strong></td>
+            <td class="summary-value"><strong id="preview-totalGross">0,00 €</strong></td>
+          </tr>
+        </tbody>
+      </table>
+      
+      <p style="margin-top: 32px; margin-bottom: 20px;">
+        <strong>Dieses Angebot ist gültig bis: <span id="preview-validUntil"></span></strong>
+      </p>
+
+      <!-- DELIVERY AND TERMS -->
+      <div style="margin-bottom: 20px;">
+        <p><strong>Lieferweg:</strong> Digital via Email</p>
+        <p><strong>Lieferzeit:</strong> <span id="preview-deliveryDays"></span> Werktage ab Beauftragung und Erhalt der Unterlagen</p>
+      </div>
+
+      <div style="margin-bottom: 20px;">
+        <p><strong>Zahlungsbedingungen:</strong> 50% Anzahlung, Rest nach Lieferung - innerhalb 14 Tage netto</p>
+      </div>
+
+      <p style="margin-bottom: 20px; font-style: italic;">
+        Mit freundlichen Grüßen<br>
+        <span id="preview-signatureName">Christopher Helm</span>
+      </p>
+
+      <!-- FOOTNOTES -->
+      <div class="footnote">
+        <p><strong>Hinweise:</strong></p>
+        <p>• Alle Preise verstehen sich in Euro zzgl. der gesetzlichen Mehrwertsteuer.</p>
+        <p>• Die Lieferzeit beginnt nach Auftragsbestätigung und Zahlungseingang der Anzahlung.</p>
+      </div>
+
+      <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #ccc; font-size: 11px; line-height: 1.6;">
+        <p><strong>Korrekturschleifen:</strong> Bis zu 2 Korrekturschleifen sind im Preis inbegriffen. Weitere Korrekturschleifen werden nach Aufwand berechnet.</p>
+        <p><strong>Nutzungsrechte:</strong> Mit vollständiger Bezahlung erhalten Sie die uneingeschränkten Nutzungsrechte an den gelieferten Visualisierungen.</p>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="page-footer">
+      <div class="footer-column">
+        <p class="company-name">ExposeProfi.de</p>
+        <p>EPCS GmbH</p>
+        <p>GF: Christopher Helm</p>
+        <p>Bruder-Klaus-Str. 3a, 78467 Konstanz</p>
+        <p>HRB 725172, Amtsgericht Freiburg</p>
+        <p>St.-Nr: 0908011277</p>
+        <p>USt-ID: DE347265281</p>
+      </div>
+
+      <div class="footer-column">
+        <p class="company-name">Bankverbindung</p>
+        <p>Qonto (Banque de France)</p>
+        <p>IBAN DE62100101239488471916</p>
+      </div>
+
+      <div class="footer-column">
+        <p>Email: christopher.helm@exposeprofi.de</p>
+        <p>Web: www.exposeprofi.de</p>
+        <p>Tel: +49-7531-1227491</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================
+       PAGE 3: PERSPECTIVE IMAGES
+       ======================================== -->
+  <div class="page" id="perspectiveImagesPage" style="display: none;">
+    <div class="page-content">
+      <!-- RECOMMENDED PERSPECTIVES -->
+      <div class="section-title">Empfohlene Perspektiven Außen:</div>
+      <div id="perspectiveImagesContainer">
+        <!-- Images will be inserted here -->
+      </div>
+    </div>
+
+  <script>
+    // Service descriptions mapping
+    const serviceDescriptions = {
+      'exterior-ground': {
+        name: '3D-Außenvisualisierung Bodenperspektive',
+        description: [
+          'Fotorealistische 3D-Visualisierung aus Bodenperspektive',
+          'Hochauflösende Darstellung (min. 3000px)',
+          'Professionelle Lichtsetzung und Materialisierung',
+          'Umgebungsgestaltung mit Vegetation und Kontext'
+        ]
+      },
+      'exterior-bird': {
+        name: '3D-Außenvisualisierung Vogelperspektive',
+        description: [
+          'Fotorealistische Vogelperspektive',
+          'Ideal für Gesamtübersicht des Projekts',
+          'Nur in Kombination mit Bodenperspektiven'
+        ]
+      },
+      '3d-floorplan': {
+        name: '3D-Grundriss',
+        description: [
+          'Fotorealistischer 3D-Grundriss',
+          'Möblierte Darstellung',
+          'Hochauflösende Qualität'
+        ]
+      },
+      '3d-complete-floor': {
+        name: '3D-Geschossansicht',
+        description: [
+          'Komplette 3D-Ansicht eines Geschosses',
+          'Alle Wohnungen in einem Geschoss',
+          'Möblierte Darstellung'
+        ]
+      },
+      '2d-floorplan': {
+        name: '2D-Grundriss',
+        description: [
+          'Professioneller 2D-Grundriss',
+          'Bemaßung und Flächenangaben',
+          'Druckfertige Qualität'
+        ]
+      },
+      'home-staging': {
+        name: 'Digital Home Staging',
+        description: [
+          'Digitale Möblierung leerer Räume',
+          'Fotorealistische Integration',
+          'Verschiedene Einrichtungsstile'
+        ]
+      },
+      'renovation': {
+        name: 'Digitale Renovierung',
+        description: [
+          'Digitale Aufbereitung alter Räume',
+          'Visualisierung von Renovierungspotential',
+          'Fotorealistische Darstellung'
+        ]
+      },
+      '360-interior': {
+        name: '360° Tour Innen',
+        description: [
+          'Interaktive 360° Innenraumtour',
+          'Navigation durch alle Räume',
+          'Einbettbar auf Website'
+        ]
+      },
+      '360-exterior': {
+        name: '360° Video Außen',
+        description: [
+          '360° Außenansicht Video',
+          'Nur mit min. 2x 3D-Außenvisualisierung',
+          'Preis auf Anfrage'
+        ]
+      },
+      'slideshow': {
+        name: 'Slideshow Video',
+        description: [
+          'Professionelles Slideshow-Video',
+          'Musik und Übergänge',
+          'Ideal für Social Media'
+        ]
+      },
+      'site-plan': {
+        name: '3D-Lageplan',
+        description: [
+          '3D-Darstellung der Lage',
+          'Umgebungskontext',
+          'Verkehrsanbindung'
+        ]
+      },
+      'social-media': {
+        name: 'Social Media Paket',
+        description: [
+          'Optimierte Bilder für Social Media',
+          'Verschiedene Formate',
+          'Stories und Posts'
+        ]
+      },
+      'interior': {
+        name: '3D-Innenvisualisierung',
+        description: [
+          'Fotorealistische Innenraumvisualisierung',
+          'Hochauflösende Darstellung',
+          'Professionelle Lichtsetzung',
+          'Verschiedene Perspektiven möglich'
+        ]
+      },
+      'terrace': {
+        name: '3D-Visualisierung Terrasse',
+        description: [
+          'Fotorealistische Terrassenvisualisierung',
+          'Mit Möblierung und Bepflanzung',
+          'Preis auf Anfrage'
+        ]
+      }
+    };
+
+    // Load proposal data from localStorage
+    function loadProposalData() {
+      const data = JSON.parse(localStorage.getItem('proposalPreviewData') || '{}');
+      
+      if (!data.clientInfo) {
+        alert('No proposal data found. Please fill out the form first.');
+        window.location.href = 'proposal-form.html';
+        return;
+      }
+
+      // Populate client info
+      document.getElementById('preview-companyName').textContent = data.clientInfo.companyName;
+      document.getElementById('preview-street').textContent = data.clientInfo.street;
+      document.getElementById('preview-postalCode').textContent = data.clientInfo.postalCode;
+      document.getElementById('preview-city').textContent = data.clientInfo.city;
+      document.getElementById('preview-country').textContent = data.clientInfo.country;
+
+      // Populate project info
+      document.getElementById('preview-date').textContent = data.projectInfo.date;
+      document.getElementById('preview-offerNumber').textContent = `2025-${data.projectInfo.MM}-${data.projectInfo.DD}-1`;
+      document.getElementById('preview-validUntil').textContent = formatDate(data.projectInfo.offerValidUntil);
+      document.getElementById('preview-deliveryDays').textContent = data.projectInfo.deliveryDays;
+
+      // Populate pricing
+      document.getElementById('preview-totalNet').textContent = data.pricing.totalNetPrice + ' €';
+      document.getElementById('preview-totalVat').textContent = data.pricing.totalVat + ' €';
+      document.getElementById('preview-totalGross').textContent = data.pricing.totalGrossPrice + ' €';
+
+      // Populate signature
+      document.getElementById('preview-signatureName').textContent = data.signature.signatureName;
+
+      // Populate services table
+      populateServicesTable(data.services);
+
+      // Populate perspective images
+      if (data.images && data.images.length > 0) {
+        populatePerspectiveImages(data.images);
+      }
+
+      // Store data globally for generate function
+      window.proposalData = data;
+    }
+
+    // Populate perspective images section
+    function populatePerspectiveImages(images) {
+      if (!images || images.length === 0) return;
+
+      const page = document.getElementById('perspectiveImagesPage');
+      const container = document.getElementById('perspectiveImagesContainer');
+      
+      page.style.display = 'flex'; // Show the page
+      container.innerHTML = ''; // Clear existing content
+
+      images.forEach((image, index) => {
+        const imageItem = document.createElement('div');
+        imageItem.className = 'perspective-image-item';
+
+        // Add title if provided
+        if (image.title) {
+          const title = document.createElement('div');
+          title.className = 'perspective-image-title';
+          title.textContent = image.title;
+          imageItem.appendChild(title);
+        }
+
+        // Add description if provided
+        if (image.description) {
+          const description = document.createElement('div');
+          description.className = 'perspective-image-description';
+          description.textContent = image.description;
+          imageItem.appendChild(description);
+        }
+
+        // Add image preview
+        if (image.imageData) {
+          const img = document.createElement('img');
+          img.className = 'perspective-image-preview';
+          img.src = image.imageData;
+          img.alt = image.title || `Perspective Image ${index + 1}`;
+          imageItem.appendChild(img);
+        }
+
+        container.appendChild(imageItem);
+      });
+    }
+
+    // Populate services table dynamically
+    function populateServicesTable(services) {
+      const tbody = document.getElementById('servicesTableBody');
+      tbody.innerHTML = '';
+
+      if (!services || services.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" class="empty-state">Keine Dienste ausgewählt.</td></tr>';
+        return;
+      }
+
+      services.forEach((service, index) => {
+        const serviceInfo = findServiceInfo(service.name);
+        
+        const row = document.createElement('tr');
+        
+        // Column 1: Quantity (editable)
+        const cellQty = document.createElement('td');
+        cellQty.className = 'col-number';
+        const qtySpan = document.createElement('span');
+        qtySpan.className = 'editable';
+        qtySpan.contentEditable = 'true';
+        qtySpan.textContent = service.quantity;
+        qtySpan.dataset.serviceIndex = index;
+        qtySpan.dataset.field = 'quantity';
+        qtySpan.addEventListener('blur', updateServiceData);
+        qtySpan.addEventListener('keydown', handleEnterKey);
+        cellQty.appendChild(qtySpan);
+        row.appendChild(cellQty);
+
+        // Column 2: Designation
+        const cellDesignation = document.createElement('td');
+        cellDesignation.className = 'col-designation';
+        cellDesignation.textContent = serviceInfo ? serviceInfo.name : service.name;
+        row.appendChild(cellDesignation);
+
+        // Column 3: Description (editable bullet points)
+        const cellDescription = document.createElement('td');
+        cellDescription.className = 'col-description';
+        
+        // Use custom description if provided, otherwise use default
+        let description;
+        if (service.customDescription && service.customDescription.length > 0) {
+          description = service.customDescription;
+        } else {
+          description = serviceInfo ? serviceInfo.description : null;
+        }
+        
+        if (description && description.length > 0) {
+          const ul = document.createElement('ul');
+          description.forEach((desc, descIndex) => {
+            const li = document.createElement('li');
+            const bulletSpan = document.createElement('span');
+            bulletSpan.className = 'editable-bullet';
+            bulletSpan.contentEditable = 'true';
+            bulletSpan.textContent = desc;
+            bulletSpan.dataset.serviceIndex = index;
+            bulletSpan.dataset.bulletIndex = descIndex;
+            bulletSpan.addEventListener('blur', updateBulletPoint);
+            bulletSpan.addEventListener('keydown', handleEnterKey);
+            li.appendChild(bulletSpan);
+            ul.appendChild(li);
+          });
+          cellDescription.appendChild(ul);
+          const hint = document.createElement('div');
+          hint.className = 'edit-hint';
+          hint.textContent = 'Click to edit';
+          cellDescription.appendChild(hint);
+        } else {
+          cellDescription.textContent = 'Beschreibung nicht verfügbar';
+        }
+        row.appendChild(cellDescription);
+
+        // Column 4: Price (editable)
+        const cellPrice = document.createElement('td');
+        cellPrice.className = 'col-price';
+        const priceSpan = document.createElement('span');
+        priceSpan.className = 'editable';
+        priceSpan.contentEditable = 'true';
+        priceSpan.textContent = service.unitPrice;
+        priceSpan.dataset.serviceIndex = index;
+        priceSpan.dataset.field = 'unitPrice';
+        priceSpan.addEventListener('blur', updateServiceData);
+        priceSpan.addEventListener('keydown', handleEnterKey);
+        cellPrice.appendChild(priceSpan);
+        const euro = document.createTextNode(' €');
+        cellPrice.appendChild(euro);
+        row.appendChild(cellPrice);
+
+        tbody.appendChild(row);
+      });
+    }
+
+    // Update service data when field is edited
+    function updateServiceData(event) {
+      const span = event.target;
+      const serviceIndex = parseInt(span.dataset.serviceIndex);
+      const field = span.dataset.field;
+      const newValue = span.textContent.trim();
+      
+      if (window.proposalData && window.proposalData.services[serviceIndex]) {
+        if (field === 'quantity') {
+          window.proposalData.services[serviceIndex][field] = parseInt(newValue) || 1;
+        } else if (field === 'unitPrice') {
+          window.proposalData.services[serviceIndex][field] = parseFloat(newValue) || 0;
+        }
+        // Update localStorage
+        localStorage.setItem('proposalData', JSON.stringify(window.proposalData));
+        console.log(`Updated ${field} for service ${serviceIndex}:`, newValue);
+      }
+    }
+
+    // Update bullet point when edited
+    function updateBulletPoint(event) {
+      const span = event.target;
+      const serviceIndex = parseInt(span.dataset.serviceIndex);
+      const bulletIndex = parseInt(span.dataset.bulletIndex);
+      const newValue = span.textContent.trim();
+      
+      if (window.proposalData && window.proposalData.services[serviceIndex]) {
+        const service = window.proposalData.services[serviceIndex];
+        
+        // Initialize customDescription if it doesn't exist
+        if (!service.customDescription) {
+          const serviceInfo = findServiceInfo(service.name);
+          service.customDescription = serviceInfo ? [...serviceInfo.description] : [];
+        }
+        
+        // Update the specific bullet point
+        if (service.customDescription[bulletIndex] !== undefined) {
+          service.customDescription[bulletIndex] = newValue;
+          // Update localStorage
+          localStorage.setItem('proposalData', JSON.stringify(window.proposalData));
+          console.log(`Updated bullet ${bulletIndex} for service ${serviceIndex}:`, newValue);
+        }
+      }
+    }
+
+    // Handle Enter key to blur (prevent line breaks)
+    function handleEnterKey(event) {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        event.target.blur();
+      }
+    }
+
+    // Find service info by name
+    function findServiceInfo(serviceName) {
+      for (const [key, value] of Object.entries(serviceDescriptions)) {
+        if (value.name === serviceName) {
+          return value;
+        }
+      }
+      return null;
+    }
+
+    // Format date to German format
+    function formatDate(dateStr) {
+      if (!dateStr) return '';
+      const date = new Date(dateStr);
+      return date.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: '2-digit' });
+    }
+
+    // Go back to form
+    function goBack() {
+      window.location.href = 'proposal-form.html';
+    }
+
+    // Generate proposal DOCX
+    async function generateProposal() {
+      const btn = document.getElementById('generateBtn');
+      const originalText = btn.textContent;
+      btn.textContent = '⏳ Generating...';
+      btn.disabled = true;
+
+      try {
+        const data = window.proposalData;
+        
+        // Create FormData for file uploads
+        const formData = new FormData();
+        
+        // Get image files from localStorage (stored during form submission)
+        const imageFiles = JSON.parse(localStorage.getItem('proposalImageFiles') || '[]');
+        
+        // Reconstruct the data structure expected by the server
+        const serverData = {
+          clientInfo: data.clientInfo,
+          projectInfo: data.projectInfo,
+          services: data.services,
+          pricing: data.pricing,
+          signature: data.signature,
+          images: data.images || []
+        };
+        
+        formData.append('data', JSON.stringify(serverData));
+        
+        // Note: File objects cannot be stored in localStorage
+        // In a real implementation, you would either:
+        // 1. Re-upload files through the preview page
+        // 2. Store files temporarily on the server
+        // 3. Use IndexedDB for file storage
+        
+        console.log('Submitting proposal with data:', serverData);
+        
+        // Send to local server
+        const apiUrl = 'http://localhost:3000/api/generate-proposal';
+        
+        const response = await fetch(apiUrl, {
+          method: 'POST',
+          body: formData
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok && result.success) {
+          alert(`✅ Proposal generated successfully!\n\nOffer Number: ${result.offerNumber}\nClient: ${result.clientName}\nTotal: ${result.totalAmount} €`);
+          console.log('Response:', result);
+          
+          // Download the file
+          if (result.fileUrl) {
+            const downloadUrl = 'http://localhost:3000' + result.fileUrl;
+            window.open(downloadUrl, '_blank');
+          }
+        } else {
+          throw new Error(result.error || 'Failed to generate proposal');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        alert(`❌ Error generating proposal:\n${error.message}\n\nMake sure the server is running (node proposal-server.js)`);
+      } finally {
+        // Reset button
+        btn.textContent = originalText;
+        btn.disabled = false;
+      }
+    }
+
+    // Load data on page load
+    window.addEventListener('DOMContentLoaded', loadProposalData);
+  </script>
+</body>
+</html>
