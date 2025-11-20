@@ -1039,9 +1039,9 @@
           const ul = document.createElement('ul');
           ul.dataset.serviceIndex = index;
           
-          // Add default bullets (non-deletable)
+          // Add default bullets (deletable now)
           defaultDescription.forEach((desc, descIndex) => {
-            const li = createBulletItem(desc, index, descIndex, false, false);
+            const li = createBulletItem(desc, index, descIndex, true, false);
             ul.appendChild(li);
           });
           

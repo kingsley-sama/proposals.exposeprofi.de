@@ -1483,9 +1483,10 @@
                 'Einbettbar auf Website'
             ],
             '360-exterior': [
-                '360° Außenansicht Video',
-                'Nur mit min. 2x 3D-Außenvisualisierung',
-                'Preis auf Anfrage'
+                {
+                    text: '360° Außenansicht Video',
+                    children: ['Nur mit min. 2x 3D-Außenvisualisierung', 'Preis auf Anfrage']
+                }
             ],
             'slideshow': [
                 'Professionelles Slideshow-Video',
@@ -1514,6 +1515,62 @@
                 'Preis auf Anfrage'
             ]
         };
+
+        // Initialize bullet UI for all services on page load
+        function initializeBulletUI() {
+            Object.keys(serviceDefaults).forEach(serviceId => {
+                const textarea = document.querySelector(`textarea[data-service="${serviceId}"]`);
+                if (!textarea) return;
+                
+                const formGroup = textarea.closest('.form-group');
+                if (!formGroup) return;
+                
+                // Replace textarea with bullet UI
+                const defaults = serviceDefaults[serviceId];
+                const defaultsHTML = renderDefaultBullets(defaults);
+                
+                const bulletUI = document.createElement('div');
+                bulletUI.innerHTML = `
+                    <label>Description Details (Optional)</label>
+                    ${defaultsHTML}
+                    <div class="bullets-container" id="bullets-${serviceId}">
+                        <ul class="bullet-list" data-service="${serviceId}"></ul>
+                    </div>
+                    <button type="button" class="add-bullet-btn" onclick="addBulletPoint('${serviceId}')">+ Add Custom Bullet Point</button>
+                    <span class="helper-text">Add custom description points - they will appear below defaults</span>
+                `;
+                
+                // Replace the form group content
+                formGroup.innerHTML = '';
+                formGroup.appendChild(bulletUI);
+            });
+        }
+
+        // Render default bullets with sub-bullets
+        function renderDefaultBullets(defaults) {
+            if (!defaults || defaults.length === 0) return '';
+            
+            let html = '<div class="default-bullets"><div class="default-bullets-title">Default Description:</div><ul>';
+            
+            defaults.forEach(item => {
+                if (typeof item === 'object' && item.text) {
+                    html += `<li>${item.text}`;
+                    if (item.children && item.children.length > 0) {
+                        html += '<ul style="list-style-type: circle; margin-left: 20px;">';
+                        item.children.forEach(child => {
+                            html += `<li>${child}</li>`;
+                        });
+                        html += '</ul>';
+                    }
+                    html += '</li>';
+                } else {
+                    html += `<li>${item}</li>`;
+                }
+            });
+            
+            html += '</ul></div>';
+            return html;
+        }
 
         // Add a new bullet point to a service
         function addBulletPoint(serviceId) {
@@ -1881,6 +1938,7 @@
 
         // Initialize on page load
         window.addEventListener('DOMContentLoaded', function() {
+            initializeBulletUI(); // Initialize bullet UI for all services
             loadSavedData(); // Load saved data
             startAutoSave(); // Start auto-save
             updateCalculations();
