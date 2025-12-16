@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Proposal Preview - ExposeProfi.de</title>
   <script src="/config.js"></script>
+  <script src="/proposal-config.js"></script>
   <style>
     * {
       margin: 0;
@@ -646,7 +647,7 @@
     <div class="page-content">
       <!-- Header -->
       <div class="exposeprofi-logo">
-        <img src="6363f6e55943431f0f248941_logo exposeprofi blau-p-500.png" alt="ExposeProfi.de">
+        <img src="logo_2.png" alt="ExposeProfi.de">
       </div>
       <div class="header-left">
         ExposeProfi.de | EPCS GmbH | Bruder-Klaus-Straße 3a | 78467 Konstanz
@@ -821,6 +822,10 @@
             <td class="summary-value"><strong><span class="editable" contenteditable="true" id="preview-subtotalNet" data-field="subtotalNet">0,00 €</span></strong></td>
           </tr>
           <!-- Discount row will be inserted here if added -->
+          <tr class="summary-row" id="total-net-row">
+            <td class="summary-label"><strong>Summe (Netto)</strong></td>
+            <td class="summary-value"><strong><span id="preview-totalNet">0,00 €</span></strong></td>
+          </tr>
           <tr class="summary-row" id="vat-row">
             <td class="summary-label"><strong><span class="editable" contenteditable="true" data-field="vatLabel">MwSt. (19%)</span></strong></td>
             <td class="summary-value"><strong><span class="editable" contenteditable="true" id="preview-totalVat" data-field="totalVat">0,00 €</span></strong></td>
@@ -840,7 +845,7 @@
 
       <!-- DELIVERY AND TERMS -->
       <div style="margin-bottom: 20px;">
-        <p><strong>Lieferweg:</strong> <span class="editable-text" contenteditable="true" data-field="deliveryMethod">Digital via Email</span></p>
+        <p><strong>Lieferweg:</strong> <span class="editable-text" contenteditable="true" data-field="deliveryMethod">Die Lieferung erfolgt digital via E-Mail oder Link nach vollständiger Zahlung und Erhalt aller notwendigen Unterlagen.</span></p>
         <p><strong>Lieferzeit:</strong> <span class="editable" contenteditable="true" id="preview-deliveryDays" data-field="deliveryDays"></span> <span class="editable-text" contenteditable="true" data-field="deliveryDaysText">Werktage ab Beauftragung und Erhalt der Unterlagen</span></p>
       </div>
 
@@ -1066,18 +1071,27 @@
 
       // Populate project info
       document.getElementById('preview-date').textContent = data.projectInfo.date;
-      document.getElementById('preview-offerNumber').textContent = `2025-${data.projectInfo.MM}-${data.projectInfo.DD}-1`;
+      const offerNumberStart = (typeof CONFIG !== 'undefined' && CONFIG.offerNumberStart) ? CONFIG.offerNumberStart : 8;
+      document.getElementById('preview-offerNumber').textContent = `2025-${data.projectInfo.MM}-${data.projectInfo.DD}-${offerNumberStart}`;
       document.getElementById('preview-validUntil').textContent = formatDate(data.projectInfo.offerValidUntil);
       document.getElementById('preview-deliveryDays').textContent = data.projectInfo.deliveryDays;
 
       // Populate pricing
-      document.getElementById('preview-subtotalNet').textContent = data.pricing.totalNetPrice + ' €';
-      document.getElementById('preview-totalVat').textContent = data.pricing.totalVat + ' €';
-      document.getElementById('preview-totalGross').textContent = data.pricing.totalGrossPrice + ' €';
+      const subtotal = data.pricing.subtotalNet || data.pricing.totalNetPrice;
+      document.getElementById('preview-subtotalNet').textContent = subtotal + ' €';
       
       // Restore discount if it exists
-      if (data.pricing.discount && data.pricing.discount.amount) {
-        addDiscountRow(data.pricing.discount.description, data.pricing.discount.amount);
+      if (data.pricing.discount && (data.pricing.discount.value || data.pricing.discount.amount)) {
+        const discountValue = data.pricing.discount.value || data.pricing.discount.amount.replace(',', '.');
+        const discountType = data.pricing.discount.type || 'fixed';
+        const discountDesc = data.pricing.discount.description || 'Rabatt';
+        addDiscountRow(discountDesc, discountValue, discountType);
+      } else {
+        // No discount, calculate totals directly
+        const subtotalNum = parseFloat(subtotal.replace(',', '.'));
+        document.getElementById('preview-totalNet').textContent = formatPrice(subtotalNum);
+        document.getElementById('preview-totalVat').textContent = data.pricing.totalVat + ' €';
+        document.getElementById('preview-totalGross').textContent = data.pricing.totalGrossPrice + ' €';
       }
 
       // Populate signature
@@ -1090,11 +1104,57 @@
       if (data.images && data.images.length > 0) {
         populatePerspectiveImages(data.images);
       }
+      
+      // Check if virtual tour is ordered and update delivery conditions and footer notes
+      const hasVirtualTour = data.services.some(s => s.name.includes('Virtueller Rundgang') || s.name.includes('Virtual Tour'));
+      updateDeliveryConditionsAndNotes(hasVirtualTour);
 
       // Store data globally for generate function
       window.proposalData = data;
     }
 
+    // Update delivery conditions and footer notes based on virtual tour
+    function updateDeliveryConditionsAndNotes(hasVirtualTour) {
+      // Default fallback values if CONFIG is not loaded
+      const defaultConfig = {
+        deliveryConditions: {
+          withVirtualTour: 'Die Lieferung der Bilder und des virtuellen Rundgangs erfolgt per WeTransfer an eine von Ihnen genannte E-Mail-Adresse. Die Lieferung erfolgt spätestens zum genannten Liefertermin.',
+          standardOnly: 'Die Lieferung der Bilder erfolgt per WeTransfer an eine von Ihnen genannte E-Mail-Adresse. Die Lieferung erfolgt spätestens zum genannten Liefertermin.'
+        },
+        footerNotes: {
+          note1: '⁽¹⁾ Sollten sich nach Beauftragung Änderungswünsche ergeben, stellen wir Ihnen gerne zwei Revisionsdurchläufe kostenfrei zur Verfügung. Weitere Revisionen werden Ihnen mit einem Aufschlag von 30 % auf den Grundpreis in Rechnung gestellt.',
+          note2: {
+            withVirtualTour: '⁽²⁾ Das Hosting des virtuellen Rundgangs ist in den ersten 12 Monaten inklusive. Nach Ablauf dieser Zeit stellen wir Ihnen die Hostinggebühren in Höhe von 5 Euro netto pro Objekt und Monat in Rechnung.',
+            withoutVirtualTour: ''
+          }
+        }
+      };
+
+      const config = (typeof CONFIG !== 'undefined') ? CONFIG : defaultConfig;
+
+      // Update delivery method/conditions
+      const deliveryMethodSpan = document.querySelector('[data-field="deliveryMethod"]');
+      if (deliveryMethodSpan) {
+        deliveryMethodSpan.textContent = hasVirtualTour 
+          ? config.deliveryConditions.withVirtualTour 
+          : config.deliveryConditions.standardOnly;
+      }
+      
+      // Update note 1 (revision policy)
+      const note1Span = document.querySelector('[data-field="note1"]');
+      if (note1Span) {
+        note1Span.textContent = config.footerNotes.note1;
+      }
+      
+      // Update note 2 (delivery time start) - conditional on virtual tour
+      const note2Span = document.querySelector('[data-field="note2"]');
+      if (note2Span) {
+        note2Span.textContent = hasVirtualTour 
+          ? config.footerNotes.note2.withVirtualTour 
+          : config.footerNotes.note2.withoutVirtualTour;
+      }
+    }
+    
     // Populate perspective images section
     function populatePerspectiveImages(images) {
       if (!images || images.length === 0) return;
@@ -1167,10 +1227,18 @@
         cellQty.appendChild(qtySpan);
         row.appendChild(cellQty);
 
-        // Column 2: Designation
+        // Column 2: Designation (now editable)
         const cellDesignation = document.createElement('td');
         cellDesignation.className = 'col-designation';
-        cellDesignation.textContent = serviceInfo ? serviceInfo.name : service.name;
+        const designationSpan = document.createElement('span');
+        designationSpan.className = 'editable';
+        designationSpan.contentEditable = 'true';
+        designationSpan.textContent = serviceInfo ? serviceInfo.name : service.name;
+        designationSpan.dataset.serviceIndex = index;
+        designationSpan.dataset.field = 'name';
+        designationSpan.addEventListener('blur', updateServiceData);
+        designationSpan.addEventListener('keydown', handleEnterKey);
+        cellDesignation.appendChild(designationSpan);
         row.appendChild(cellDesignation);
 
         // Column 3: Description (editable bullet points)
@@ -1812,8 +1880,8 @@
       return date.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: '2-digit' });
     }
 
-    // Add discount row
-    function addDiscountRow(description = '', amount = '') {
+    // Add discount row with % or EUR support
+    function addDiscountRow(description = '', amount = '', type = 'fixed') {
       // Check if discount row already exists
       if (document.getElementById('discount-row')) {
         alert('Rabatt bereits hinzugefügt. Bitte bearbeiten Sie den bestehenden Rabatt.');
@@ -1821,12 +1889,15 @@
       }
 
       const tbody = document.getElementById('summary-tbody');
-      const vatRow = document.getElementById('vat-row');
+      const totalNetRow = document.getElementById('total-net-row');
       
       // Create discount row
       const discountRow = document.createElement('tr');
       discountRow.className = 'summary-row discount-row';
       discountRow.id = 'discount-row';
+      
+      const isPercentage = type === 'percentage';
+      const displayAmount = isPercentage ? `${amount || '0'}% (0,00 €)` : `${amount || '0,00'} €`;
       
       discountRow.innerHTML = `
         <td class="summary-label">
@@ -1836,14 +1907,20 @@
         </td>
         <td class="summary-value">
           <strong>
-            - <span class="editable" contenteditable="true" id="discount-amount" data-field="discountAmount">${amount || '0,00'}</span> €
+            <select id="discount-type" style="padding: 4px; margin-right: 8px; border: 1px solid #ccc; border-radius: 4px;">
+              <option value="fixed" ${!isPercentage ? 'selected' : ''}>EUR</option>
+              <option value="percentage" ${isPercentage ? 'selected' : ''}>%</option>
+            </select>
+            - <span class="editable" contenteditable="true" id="discount-amount" data-field="discountAmount">${amount || (isPercentage ? '0' : '0,00')}</span>
+            <span id="discount-suffix">${isPercentage ? '% ' : ' €'}</span>
+            <span id="discount-calculated" style="color: #666; font-size: 9pt;">${isPercentage ? '(0,00 €)' : ''}</span>
             <button class="remove-discount-btn" onclick="removeDiscountRow()">Entfernen</button>
           </strong>
         </td>
       `;
       
-      // Insert before VAT row
-      tbody.insertBefore(discountRow, vatRow);
+      // Insert before Total Net row
+      tbody.insertBefore(discountRow, totalNetRow);
       
       // Hide add button
       document.getElementById('add-discount-btn').style.display = 'none';
@@ -1854,13 +1931,117 @@
           window.proposalData.pricing.discount = {};
         }
         window.proposalData.pricing.discount.description = description || 'Mengenrabatt';
-        window.proposalData.pricing.discount.amount = amount || '0,00';
+        window.proposalData.pricing.discount.amount = amount || (isPercentage ? '0' : '0,00');
+        window.proposalData.pricing.discount.type = type || 'fixed';
         localStorage.setItem('proposalData', JSON.stringify(window.proposalData));
       }
       
-      // Add event listeners for discount fields
+      // Add event listeners
       document.getElementById('discount-description').addEventListener('blur', updateDiscountData);
       document.getElementById('discount-amount').addEventListener('blur', updateDiscountData);
+      document.getElementById('discount-type').addEventListener('change', handleDiscountTypeChange);
+      
+      // Calculate discount if percentage
+      if (isPercentage) {
+        calculatePercentageDiscount();
+      }
+    }
+    
+    // Handle discount type change
+    function handleDiscountTypeChange(event) {
+      const type = event.target.value;
+      const amountSpan = document.getElementById('discount-amount');
+      const suffix = document.getElementById('discount-suffix');
+      const calculated = document.getElementById('discount-calculated');
+      
+      if (type === 'percentage') {
+        suffix.textContent = '% ';
+        calculated.style.display = 'inline';
+        calculatePercentageDiscount();
+      } else {
+        suffix.textContent = ' €';
+        calculated.style.display = 'none';
+        recalculateTotals();
+      }
+      
+      // Update proposalData
+      if (window.proposalData && window.proposalData.pricing.discount) {
+        window.proposalData.pricing.discount.type = type;
+        localStorage.setItem('proposalPreviewData', JSON.stringify(window.proposalData));
+      }
+    }
+    
+    // Calculate percentage discount
+    function calculatePercentageDiscount() {
+      const subtotalText = document.getElementById('preview-subtotalNet').textContent;
+      const subtotal = parseFloat(subtotalText.replace(/[^\d,.-]/g, '').replace(',', '.')) || 0;
+      
+      const percentageText = document.getElementById('discount-amount').textContent;
+      const percentage = parseFloat(percentageText.replace(/[^\d,.-]/g, '').replace(',', '.')) || 0;
+      
+      const discountAmount = (subtotal * percentage / 100).toFixed(2).replace('.', ',');
+      document.getElementById('discount-calculated').textContent = `(${discountAmount} €)`;
+      
+      // Recalculate totals
+      recalculateTotals();
+      
+      return discountAmount;
+    }
+    
+    // Recalculate all totals with discount
+    function recalculateTotals() {
+      const subtotalText = document.getElementById('preview-subtotalNet').textContent;
+      const subtotal = parseFloat(subtotalText.replace(/[^\d,.-]/g, '').replace(',', '.')) || 0;
+      
+      let discountAmount = 0;
+      const discountRow = document.getElementById('discount-row');
+      
+      if (discountRow) {
+        const discountType = document.getElementById('discount-type').value;
+        const discountValueText = document.getElementById('discount-amount').textContent;
+        const discountValue = parseFloat(discountValueText.replace(/[^\d,.-]/g, '').replace(',', '.')) || 0;
+        
+        if (discountType === 'percentage') {
+          discountAmount = subtotal * discountValue / 100;
+        } else {
+          discountAmount = discountValue;
+        }
+      }
+      
+      const totalNet = subtotal - discountAmount;
+      const totalVat = totalNet * 0.19;
+      const totalGross = totalNet + totalVat;
+      
+      // Update display
+      document.getElementById('preview-totalNet').textContent = formatPrice(totalNet);
+      document.getElementById('preview-totalVat').textContent = formatPrice(totalVat);
+      document.getElementById('preview-totalGross').textContent = formatPrice(totalGross);
+      
+      // Update proposalData and localStorage
+      if (window.proposalData) {
+        window.proposalData.pricing.totalNetPrice = formatPrice(totalNet);
+        window.proposalData.pricing.totalVat = formatPrice(totalVat);
+        window.proposalData.pricing.totalGrossPrice = formatPrice(totalGross);
+        
+        if (discountRow) {
+          const discountType = document.getElementById('discount-type').value;
+          const discountValueText = document.getElementById('discount-amount').textContent;
+          const discountDesc = document.getElementById('discount-description').textContent;
+          
+          window.proposalData.pricing.discount = {
+            description: discountDesc,
+            amount: discountValueText.trim(),
+            type: discountType
+          };
+        }
+        
+        localStorage.setItem('proposalPreviewData', JSON.stringify(window.proposalData));
+      }
+    }
+    
+    // Helper function to format price
+    function formatPrice(value) {
+      return value.toFixed(2).replace('.', ',') + ' €';
     }
 
     // Remove discount row
@@ -1876,8 +2057,11 @@
       // Remove from proposalData
       if (window.proposalData && window.proposalData.pricing.discount) {
         delete window.proposalData.pricing.discount;
-        localStorage.setItem('proposalData', JSON.stringify(window.proposalData));
+        localStorage.setItem('proposalPreviewData', JSON.stringify(window.proposalData));
       }
+      
+      // Recalculate totals without discount
+      recalculateTotals();
     }
 
     // Update discount data
@@ -1894,9 +2078,17 @@
           window.proposalData.pricing.discount.description = value;
         } else if (field === 'discountAmount') {
           window.proposalData.pricing.discount.amount = value;
+          
+          // Recalculate if percentage type
+          const discountType = document.getElementById('discount-type').value;
+          if (discountType === 'percentage') {
+            calculatePercentageDiscount();
+          } else {
+            recalculateTotals();
+          }
         }
         
-        localStorage.setItem('proposalData', JSON.stringify(window.proposalData));
+        localStorage.setItem('proposalPreviewData', JSON.stringify(window.proposalData));
       }
     }
 
@@ -2005,7 +2197,10 @@
             if (fieldName === 'subtotalNet') {
               // Update the subtotal (remove € sign and spaces)
               const cleanValue = newValue.replace(/[€\s]/g, '');
+              window.proposalData.pricing.subtotalNet = cleanValue;
               window.proposalData.pricing.totalNetPrice = cleanValue;
+              // Recalculate totals when subtotal changes
+              recalculateTotals();
             } else if (fieldName === 'totalVat') {
               const cleanValue = newValue.replace(/[€\s]/g, '');
               window.proposalData.pricing.totalVat = cleanValue;

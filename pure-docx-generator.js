@@ -27,8 +27,9 @@ class PureDocxProposalGenerator {
       signatureName: data.signatureName || 'Christopher Helm',
       images: data.images || [],
       services: data.services || [],
+      discount: data.discount || null,
     };
-    this.offerNumber = `2025-${this.data.MM}-${this.data.DD}-1`;
+    this.offerNumber = `2025-${this.data.MM}-${this.data.DD}-8`; // Changed from -1 to -8
     
     // Use imported serviceDescriptions instead of local definition
     this.serviceDescriptions = serviceDescriptions;
@@ -59,17 +60,45 @@ class PureDocxProposalGenerator {
     let totalNet = 0;
     
     this.data.services.forEach(service => {
-      if (service.price && service.quantity) {
-        const price = parseFloat(service.price.replace(',', '.'));
+      // Handle both unitPrice and totalPrice formats
+      let serviceTotal = 0;
+      
+      if (service.totalPrice) {
+        const priceStr = String(service.totalPrice).replace(/[^\d,.-]/g, '');
+        serviceTotal = parseFloat(priceStr.replace(',', '.'));
+      } else if (service.unitPrice && service.quantity) {
+        const priceStr = String(service.unitPrice).replace(/[^\d,.-]/g, '');
+        const price = parseFloat(priceStr.replace(',', '.'));
         const quantity = parseInt(service.quantity);
-        totalNet += price * quantity;
+        if (!isNaN(price) && !isNaN(quantity)) {
+          serviceTotal = price * quantity;
+        }
+      }
+      
+      if (!isNaN(serviceTotal)) {
+        totalNet += serviceTotal;
       }
     });
     
-    const totalVat = totalNet * 0.19;
-    const totalGross = totalNet + totalVat;
+    // Apply discount if present
+    let discountAmount = 0;
+    if (this.data.discount && this.data.discount.amount) {
+      const discountStr = String(this.data.discount.amount).replace(/[^\d,.-]/g, '');
+      if (this.data.discount.type === 'percentage') {
+        const percentage = parseFloat(discountStr.replace(',', '.'));
+        discountAmount = totalNet * (percentage / 100);
+      } else {
+        discountAmount = parseFloat(discountStr.replace(',', '.'));
+      }
+    }
     
-    this.data.totalNetPrice = this.formatPrice(totalNet);
+    const netAfterDiscount = totalNet - discountAmount;
+    const totalVat = netAfterDiscount * 0.19;
+    const totalGross = netAfterDiscount + totalVat;
+    
+    this.data.subtotalNet = this.formatPrice(totalNet);
+    this.data.discountAmount = discountAmount > 0 ? this.formatPrice(discountAmount) : null;
+    this.data.totalNetPrice = this.formatPrice(netAfterDiscount);
     this.data.totalVat = this.formatPrice(totalVat);
     this.data.totalGrossPrice = this.formatPrice(totalGross);
   }
@@ -998,45 +1027,88 @@ class PureDocxProposalGenerator {
   }
 
   /**
-   * Create pricing summary section
+   * Create pricing summary section with optional discount
    */
   createPricingSummary() {
+    const rows = [];
+    
+    // Subtotal row (if discount exists)
+    if (this.data.discountAmount) {
+      rows.push(
+        new TableRow({
+          children: [
+            this.createTableCell('', { width: 8 }),
+            this.createTableCell('Zwischensumme (Netto)', { width: 28 }),
+            this.createTableCell('', { width: 54 }),
+            this.createTableCell(`${this.data.subtotalNet} €`, { width: 10, centerAlign: true }),
+          ],
+        })
+      );
+      
+      // Discount row
+      const discountLabel = this.data.discount?.description || 'Rabatt';
+      const discountTypeLabel = this.data.discount?.type === 'percentage' 
+        ? ` (${this.data.discount.amount}%)` 
+        : '';
+      rows.push(
+        new TableRow({
+          children: [
+            this.createTableCell('', { width: 8 }),
+            this.createTableCell(`${discountLabel}${discountTypeLabel}`, { width: 28 }),
+            this.createTableCell('', { width: 54 }),
+            this.createTableCell(`- ${this.data.discountAmount} €`, { width: 10, centerAlign: true }),
+          ],
+        })
+      );
+    }
+    
+    // Net total row
+    rows.push(
+      new TableRow({
+        children: [
+          this.createTableCell('', { width: 8 }),
+          this.createTableCell('Gesamtpreis Netto', { bold: true, width: 28 }),
+          this.createTableCell('', { width: 54 }),
+          this.createTableCell(`${this.data.totalNetPrice} €`, { width: 10, centerAlign: true }),
+        ],
+      })
+    );
+    
+    // VAT row
+    rows.push(
+      new TableRow({
+        children: [
+          this.createTableCell('', { width: 8 }),
+          this.createTableCell('MwSt. (19 %)', { width: 28 }),
+          this.createTableCell('', { width: 54 }),
+          this.createTableCell(`${this.data.totalVat} €`, { width: 10, centerAlign: true }),
+        ],
+      })
+    );
+    
+    // Gross total row
+    rows.push(
+      new TableRow({
+        children: [
+          this.createTableCell('', { width: 8 }),
+          this.createTableCell('Gesamtpreis Brutto', { bold: true, width: 28 }),
+          this.createTableCell('', { width: 54 }),
+          this.createTableCell(`${this.data.totalGrossPrice} €`, { width: 10, centerAlign: true }),
+        ],
+      })
+    );
+    
     return [
       new Paragraph({
-        spacing: { before: 400, after: 250 },
+        spacing: { before: 200, after: 150 },
         children: [new TextRun({ text: 'Zusammenfassung:', bold: true, size: 24 })],
       }),
       new Table({
         width: { size: 100, type: WidthType.PERCENTAGE },
         margins: {
-          bottom: 600, // Add bottom margin to prevent touching footer
+          bottom: 600,
         },
-        rows: [
-          new TableRow({
-            children: [
-              this.createTableCell('', { width: 8 }),
-              this.createTableCell('Gesamtpreis Netto', { bold: true, width: 28 }),
-              this.createTableCell('', { width: 54 }),
-              this.createTableCell(`${this.data.totalNetPrice} €`, { width: 10, centerAlign: true }),
-            ],
-          }),
-          new TableRow({
-            children: [
-              this.createTableCell('', { width: 8 }),
-              this.createTableCell('MwSt. (19 %)', { width: 28 }),
-              this.createTableCell('', { width: 54 }),
-              this.createTableCell(`${this.data.totalVat} €`, { width: 10, centerAlign: true }),
-            ],
-          }),
-          new TableRow({
-            children: [
-              this.createTableCell('', { width: 8 }),
-              this.createTableCell('Gesamtpreis Brutto', { bold: true, width: 28 }),
-              this.createTableCell('', { width: 54 }),
-              this.createTableCell(`${this.data.totalGrossPrice} €`, { width: 10, centerAlign: true }),
-            ],
-          }),
-        ],
+        rows: rows,
       }),
     ];
   }
@@ -1132,45 +1204,90 @@ class PureDocxProposalGenerator {
   }
 
   /**
+   * Check if virtual tour is ordered
+   */
+  hasVirtualTour() {
+    return this.data.services.some(service => 
+      service.name && (
+        service.name.includes('360') || 
+        service.name.toLowerCase().includes('virtual') ||
+        service.name.toLowerCase().includes('tour')
+      )
+    );
+  }
+
+  /**
+   * Create delivery conditions based on virtual tour
+   */
+  createDeliveryConditions() {
+    const hasVirtualTour = this.hasVirtualTour();
+    
+    const deliveryText = hasVirtualTour
+      ? 'Die Lieferung der Bilder und des virtuellen Rundgangs erfolgt per WeTransfer an eine von Ihnen genannte E-Mail-Adresse. Die Lieferung erfolgt spätestens zum genannten Liefertermin.'
+      : 'Die Lieferung der Bilder erfolgt per WeTransfer an eine von Ihnen genannte E-Mail-Adresse. Die Lieferung erfolgt spätestens zum genannten Liefertermin.';
+    
+    return [
+      new Paragraph({
+        spacing: { after: 120 },
+        children: [
+          new TextRun({ text: 'Lieferweg: ', bold: true, size: 20 }),
+          new TextRun({ text: deliveryText, size: 20 }),
+        ],
+      }),
+      new Paragraph({
+        spacing: { after: 120 },
+        children: [
+          new TextRun({ text: 'Lieferzeit: ', bold: true, size: 20 }),
+          new TextRun({ text: `${this.data.deliveryDays} Werktage ab Beauftragung und Erhalt der Unterlagen`, size: 20 }),
+        ],
+      }),
+      new Paragraph({
+        spacing: { after: 150 },
+        children: [
+          new TextRun({ text: 'Zahlungsbedingungen: ', bold: true, size: 20 }),
+          new TextRun({ text: '50% Anzahlung, Rest nach Lieferung - innerhalb 14 Tage netto', size: 20 }),
+        ],
+      }),
+    ];
+  }
+
+  /**
+   * Create footnote 2 (only if virtual tour is ordered)
+   */
+  createFootnote2() {
+    const hasVirtualTour = this.hasVirtualTour();
+    
+    if (!hasVirtualTour) {
+      return [];
+    }
+    
+    return [
+      new Paragraph({
+        spacing: { before: 100, after: 100 },
+        children: [
+          new TextRun({ text: '⁽²⁾ ', bold: true, size: 18 }),
+          new TextRun({ text: 'Das Hosting des virtuellen Rundgangs ist in den ersten 12 Monaten inklusive. Nach Ablauf dieser Zeit stellen wir Ihnen die Hostinggebühren in Höhe von 5 Euro netto pro Objekt und Monat in Rechnung.', size: 17 })
+        ],
+      }),
+    ];
+  }
+
+  /**
    * Create terms and conditions section for Page 5
    */
   createTermsSection() {
     return [
       // Offer validity
       new Paragraph({
-        spacing: { before: 400, after: 200 },
+        spacing: { before: 200, after: 150 },
         children: [
           new TextRun({ text: 'Dieses Angebot ist gültig bis: ', bold: true, size: 22 }),
           new TextRun({ text: this.data.offerValidUntil, bold: true, size: 22 }),
         ],
       }),
       
-      // Delivery way
-      new Paragraph({
-        spacing: { after: 160 },
-        children: [
-          new TextRun({ text: 'Lieferweg: ', bold: true, size: 20 }),
-          new TextRun({ text: 'Digital via Email', size: 20 }),
-        ],
-      }),
-      
-      // Expected delivery date
-      new Paragraph({
-        spacing: { after: 160 },
-        children: [
-          new TextRun({ text: 'Voraussichtl. Leistungsdatum: ', bold: true, size: 20 }),
-          new TextRun({ text: `${this.data.deliveryDays} Arbeitstage nach Auftragseingang und Erhalt aller Unterlagen und Informationen`, size: 20 }),
-        ],
-      }),
-      
-      // Delivery date with down payment
-      new Paragraph({
-        spacing: { after: 200 },
-        children: [
-          new TextRun({ text: 'Voraussichtl. Leistungsdatum: ', bold: true, size: 20 }),
-          new TextRun({ text: `${this.data.deliveryDays} Arbeitstage nach Eingang der Anzahlung i.H.v. 50% des Bruttopreises (N, NNN, NN EUR) und Erhalt aller Unterlagen und Informationen`, size: 20 }),
-        ],
-      }),
+      // Delivery conditions - conditional based on virtual tour
+      ...this.createDeliveryConditions(),
       
       // Signature
       new Paragraph({
@@ -1183,31 +1300,12 @@ class PureDocxProposalGenerator {
       
       // Footnote (1)
       new Paragraph({
-        spacing: { before: 400, after: 200 },
-        children: [new TextRun({ text: '(1):', bold: true, size: 18 })],
-      }),
-      new Paragraph({
-        spacing: { after: 200 },
-        alignment: AlignmentType.JUSTIFIED,
-        children: [new TextRun({ 
-          text: 'Sollten Sie dadurch eine weitere Revision benötigen, die nicht durch uns verschuldet wurde, führen wir diese zum kostenlosen Grundpreis durchgehend. Bei komplexeren Änderungswünschen, welche eine deutlich längere Bearbeitungszeit benötigen, behalten wir uns das Recht vor, 50% der ursprünglichen Lieferzeit zu berechnen. Bei Hunderten von Projekten benötigen unsere Kunden im Schnitt unter 6 aller Fälle eine zweite Revision. 50% der ursprünglichen Lieferzeit dauert eine Revision durchschnittlich 2-3 Arbeitstage.', 
-          size: 17 
-        })],
+        spacing: { before: 200, after: 100 },
+        children: [new TextRun({ text: '⁽¹⁾ ', bold: true, size: 18 }), new TextRun({ text: 'Sollten sich nach Beauftragung Änderungswünsche ergeben, stellen wir Ihnen gerne zwei Revisionsdurchläufe kostenfrei zur Verfügung. Weitere Revisionen werden Ihnen mit einem Aufschlag von 30 % auf den Grundpreis in Rechnung gestellt.', size: 17 })],
       }),
       
-      // Footnote (2)
-      new Paragraph({
-        spacing: { before: 200, after: 200 },
-        children: [new TextRun({ text: '(2):', bold: true, size: 18 })],
-      }),
-      new Paragraph({
-        spacing: { after: 200 },
-        alignment: AlignmentType.JUSTIFIED,
-        children: [new TextRun({ 
-          text: 'Sofern Sie nach 12 Monaten die Tour immer noch benutzen möchten, können Sie diese gerne verlängern, wobei eine geringe Gebühr für 12 Monate anfällt.', 
-          size: 17 
-        })],
-      }),
+      // Footnote (2) - only if virtual tour is ordered
+      ...this.createFootnote2(),
       
       // Disclaimer
       new Paragraph({
@@ -1364,7 +1462,7 @@ if (require.main === module) {
 
   const generator = new PureDocxProposalGenerator(sampleData);
   const outputPath = path.join(__dirname, 'output', 'pure-proposal.docx');
-  const logoPath = path.join(__dirname, '6363f6e55943431f0f248941_logo exposeprofi blau-p-500.png');
+  const logoPath = path.join(__dirname, 'logo_2.png');
   
   // Create output directory
   const outputDir = path.dirname(outputPath);
