@@ -6,7 +6,7 @@ const fs = require('fs');
 const axios = require('axios');
 const { PureDocxProposalGenerator } = require('./pure-docx-generator');
 const https = require('https');
-const {getClientDetails} = require('./utils.js')
+const {getClientDetails, save_proposal_detail} = require('./utils.js')
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -180,8 +180,8 @@ app.post('/api/generate-proposal', async (req, res) => {
     const MM = projectInfo.MM || '01';
     const DD = projectInfo.DD || '01';
     const safeCompanyName = clientInfo.companyName
-      .replace(/[^a-zA-Z0-9]/g, '')
-      .substring(0, 30);
+      .replace(/[^a-zA-Z0-9äöüÄÖÜß\s&]/g, '')
+      .substring(0, 50);
     const filename = `${YY}${MM}${DD}_Angebot_${safeCompanyName} ExposéProfi.docx`;
     
     // Generate DOCX
@@ -192,6 +192,43 @@ app.post('/api/generate-proposal', async (req, res) => {
     await generator.save(outputPath, logoPath);
     
     console.log('✅ Proposal generated:', outputPath);
+
+    // Save proposal to database
+    const proposalDbData = {
+      client_id: dbClientData ? dbClientData.client_id : null,
+      company_name: clientInfo.companyName,
+      street_no: clientInfo.street,
+      city: clientInfo.city,
+      country: clientInfo.country || 'Deutschland',
+      postal_code: clientInfo.postalCode,
+      project_number: projectInfo.projectNumber || null,
+      project_name: projectInfo.projectName || null,
+      project_type: projectInfo.projectType || null,
+      offer_number: generator.offerNumber,
+      delivery_time_min: projectInfo.deliveryDays ? parseInt(projectInfo.deliveryDays.split('-')[0]) : null,
+      delivery_time_max: projectInfo.deliveryDays ? parseInt(projectInfo.deliveryDays.split('-')[1]) : null,
+      services: services,
+      pricing: {
+        subtotalNet: pricing.subtotalNet,
+        totalNetPrice: pricing.totalNetPrice,
+        totalVat: pricing.totalVat,
+        totalGrossPrice: pricing.totalGrossPrice,
+        discount: pricing.discount
+      },
+      discount_type: pricing.discount?.type || null,
+      discount_value: pricing.discount?.amount || null,
+      currency: 'EUR',
+      total_price: parseFloat(pricing.totalGrossPrice?.replace(/[^0-9.,]/g, '').replace('.', '').replace(',', '.')) || null,
+      image_urls: imageMetadata?.map(img => ({ title: img.title, description: img.description })) || [],
+      document_url: null
+    };
+
+    const savedProposal = await save_proposal_detail(proposalDbData);
+    if (savedProposal) {
+      console.log('✅ Proposal saved to database with ID:', savedProposal[0]?.id);
+    } else {
+      console.warn('⚠️ Failed to save proposal to database');
+    }
 
     // Send data to n8n webhook
     const webhookPayload = {
@@ -260,7 +297,7 @@ app.post('/api/generate-proposal', async (req, res) => {
       fileUrl: `/output/${clientFolderName}/${filename}`,
       filePath: outputPath,
       clientFolder: clientFolderName,
-      offerNumber: offerNumber,
+      offerNumber: generator.offerNumber,
       clientName: clientInfo.companyName,
       totalAmount: pricing.totalGrossPrice,
       imagesIncluded: images.length,

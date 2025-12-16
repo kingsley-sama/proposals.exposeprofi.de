@@ -121,9 +121,9 @@ class PureDocxProposalGenerator {
         margin: {
           top: 1440,       // 1" = 1440 twips
           right: 1440,
-          bottom: 1800,    // 1.25" = 1800 twips (increased for footer space)
+          bottom: 2400,    // 1.67" = 2400 twips (increased for footer space)
           left: 1440,
-          footer: 900,     // Footer 0.625" from bottom (increased)
+          footer: 1100,    // Footer 0.76" from bottom (increased)
         },
       },
     };
@@ -431,6 +431,7 @@ class PureDocxProposalGenerator {
 
       rows.push(
         new TableRow({
+          cantSplit: true,
           children: [
             // Column 1: Quantity
             new TableCell({
@@ -475,6 +476,7 @@ class PureDocxProposalGenerator {
         // Add title row
         rows.push(
           new TableRow({
+            cantSplit: true,
             children: [
               new TableCell({
                 width: { size: 8, type: WidthType.PERCENTAGE },
@@ -510,6 +512,7 @@ class PureDocxProposalGenerator {
         serviceInfo.pricingTiers.forEach(tier => {
           rows.push(
             new TableRow({
+              cantSplit: true,
               children: [
                 new TableCell({
                   width: { size: 8, type: WidthType.PERCENTAGE },
@@ -1138,6 +1141,7 @@ class PureDocxProposalGenerator {
     if (this.data.discountAmount) {
       rows.push(
         new TableRow({
+          cantSplit: true,
           children: [
             this.createTableCell('Zwischensumme (Netto)', { width: 70, bold: true }),
             this.createTableCell(`${this.data.subtotalNet} €`, { width: 30, centerAlign: true, bold: true }),
@@ -1152,6 +1156,7 @@ class PureDocxProposalGenerator {
         : '';
       rows.push(
         new TableRow({
+          cantSplit: true,
           children: [
             this.createTableCell(`${discountLabel}${discountTypeLabel}`, { width: 70 }),
             this.createTableCell(`- ${this.data.discountAmount} €`, { width: 30, centerAlign: true }),
@@ -1163,6 +1168,7 @@ class PureDocxProposalGenerator {
     // Net total row
     rows.push(
       new TableRow({
+        cantSplit: true,
         children: [
           this.createTableCell('Gesamtpreis Netto', { bold: true, width: 70 }),
           this.createTableCell(`${this.data.totalNetPrice} €`, { width: 30, centerAlign: true, bold: true }),
@@ -1173,6 +1179,7 @@ class PureDocxProposalGenerator {
     // VAT row
     rows.push(
       new TableRow({
+        cantSplit: true,
         children: [
           this.createTableCell('MwSt. (19 %)', { width: 70 }),
           this.createTableCell(`${this.data.totalVat} €`, { width: 30, centerAlign: true }),
@@ -1183,6 +1190,7 @@ class PureDocxProposalGenerator {
     // Gross total row
     rows.push(
       new TableRow({
+        cantSplit: true,
         children: [
           this.createTableCell('Gesamtpreis Brutto', { bold: true, width: 70 }),
           this.createTableCell(`${this.data.totalGrossPrice} €`, { width: 30, centerAlign: true, bold: true }),
@@ -1199,7 +1207,7 @@ class PureDocxProposalGenerator {
         width: { size: 100, type: WidthType.PERCENTAGE },
         rows: rows,
       }),
-      new Paragraph({ spacing: { after: 2000 }, children: [] }),
+      new Paragraph({ spacing: { after: 3000 }, children: [] }),
     ];
   }
 

@@ -42,13 +42,12 @@ async function getClientDetails(clientNumberOrId) {
     }
 }
 
-async function save_proposal_detail() {
-    try{
+async function save_proposal_detail(proposalData) {
+    try {
         const { data, error } = await db
             .from('proposals')
-            .insert([
-                
-            ]);
+            .insert([proposalData])
+            .select();
 
         if (error) {
             console.error('Error saving proposal details:', error);
@@ -56,8 +55,9 @@ async function save_proposal_detail() {
         }
         console.log('Proposal details saved:', data);
         return data;
-    }catch(err){
-
+    } catch (err) {
+        console.error('Exception in save_proposal_detail:', err);
+        return null;
     }
 }
 
