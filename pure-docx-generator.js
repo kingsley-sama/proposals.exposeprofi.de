@@ -1313,13 +1313,13 @@ class PureDocxProposalGenerator {
 
   /**
    * Check if virtual tour is ordered
+   * Only returns true for 360° Interior Tour (Virtuelle Tour), not for other 360 services
    */
   hasVirtualTour() {
     return this.data.services.some(service => 
       service.name && (
-        service.name.includes('360') || 
-        service.name.toLowerCase().includes('virtual') ||
-        service.name.toLowerCase().includes('tour')
+        (service.name.includes('360') && service.name.toLowerCase().includes('innen')) ||
+        (service.name.toLowerCase().includes('virtuelle') && service.name.toLowerCase().includes('tour'))
       )
     );
   }

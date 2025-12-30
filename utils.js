@@ -42,6 +42,48 @@ async function getClientDetails(clientNumberOrId) {
     }
 }
 
+async function getClientDetailsByEmail(email) {
+    console.log('Fetching client details by email:', email);
+    try {
+        // Query companies table using company_primary_domain (email domain)
+        const { data: companyData, error: companyError } = await db
+            .from('companies')
+            .select(`
+                company_id,
+                client_id,
+                company_name,
+                company_primary_domain
+            `)
+            .eq('company_primary_domain', email)
+            .limit(1);
+        
+        if (companyError) {
+            console.error('Error fetching company details by email:', companyError);
+            return null;
+        }
+        
+        if (companyData && companyData.length > 0) {
+            const company = companyData[0];
+            
+            const result = [{
+                company_id: company.company_id,
+                client_id: company.client_id,
+                company_name: company.company_name,
+                company_primary_domain: company.company_primary_domain
+            }];
+            
+            console.log('Company details retrieved by email:', result);
+            return result;
+        }
+        
+        console.log('No company found with email:', email);
+        return null;
+    } catch (err) {
+        console.error('Exception in getClientDetailsByEmail:', err);
+        return null;
+    }
+}
+
 async function save_proposal_detail(proposalData) {
     try {
         const { data, error } = await db
@@ -61,4 +103,4 @@ async function save_proposal_detail(proposalData) {
     }
 }
 
-module.exports = { getClientDetails, save_proposal_detail };
+module.exports = { getClientDetails, getClientDetailsByEmail, save_proposal_detail };

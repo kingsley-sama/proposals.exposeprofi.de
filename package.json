@@ -1,23 +1,26 @@
 {
   "name": "proposal-html-to-docx",
   "version": "1.0.0",
-  "description": "Convert HTML proposal to editable DOCX document",
-  "main": "proposal-to-docx.js",
-  "type": "commonjs",
+  "description": "Convert HTML proposal to editable DOCX document - Next.js App",
+  "main": "pages/index.js",
   "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "export": "next export",
     "convert": "nodemon convert-cli.js",
     "convert-simple": "nodemon html-to-docx.js",
     "convert-advanced": "nodemon proposal-to-docx.js",
     "test": "nodemon proposal-to-docx.js",
-    "server": "nodemon proposal-server.js",
-    "start": "nodemon proposal-server.js"
+    "server": "nodemon proposal-server.js"
   },
   "keywords": [
     "html",
     "docx",
     "converter",
     "proposal",
-    "word"
+    "word",
+    "nextjs"
   ],
   "author": "",
   "license": "MIT",
@@ -32,6 +35,11 @@
     "html-to-docx": "^1.1.0",
     "jsdom": "^27.1.0",
     "multer": "^2.0.2",
+    "next": "^14.2.0",
+    "react": "^18.3.0",
+    "react-dom": "^18.3.0"
+  },
+  "devDependencies": {
     "nodemon": "^3.1.11"
   }
 }
