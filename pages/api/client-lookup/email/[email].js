@@ -1,4 +1,4 @@
-import { getClientDetailsByEmail } from '../../../utils.js';
+import { getClientDetailsByEmail } from '../../../../utils.js';
 
 // API endpoint to lookup client by company email
 export default async function handler(req, res) {

@@ -1,4 +1,4 @@
-import { getClientDetails } from '../../utils.js';
+import { getClientDetails } from '../../../utils.js';
 
 // API endpoint to lookup client by client number
 export default async function handler(req, res) {
